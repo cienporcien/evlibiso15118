@@ -1,0 +1,134 @@
+{
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"ExternalProject_Add"
+		],
+		"files" : 
+		[
+			"/usr/share/cmake-3.25/Modules/ExternalProject.cmake",
+			"3rd_party/mbedtls/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 18,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 3985,
+				"parent" : 1
+			}
+		]
+	},
+	"folder" : 
+	{
+		"name" : "ExternalProjectTargets/custom_mbedtls"
+	},
+	"id" : "custom_mbedtls::@e0fd3f899f93d7a6e884",
+	"name" : "custom_mbedtls",
+	"paths" : 
+	{
+		"build" : "3rd_party/mbedtls",
+		"source" : "3rd_party/mbedtls"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 2,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/CMakeFiles/custom_mbedtls",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/CMakeFiles/custom_mbedtls.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/CMakeFiles/custom_mbedtls-complete.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls-stamp/custom_mbedtls-build.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls-stamp/custom_mbedtls-configure.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls-stamp/custom_mbedtls-download.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls-stamp/custom_mbedtls-install.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls-stamp/custom_mbedtls-mkdir.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls-stamp/custom_mbedtls-patch.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls-stamp/custom_mbedtls-update.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}
