@@ -1,1 +1,1 @@
-cmd='/usr/bin/cmake;-DENABLE_PROGRAMS=OFF;-DENABLE_TESTING=OFF;-DDISABLE_PACKAGE_CONFIG_AND_INSTALL=ON;-DMBEDTLS_USER_CONFIG_FILE=/home/opbrid/checkout/everest_main/libiso15118/3rd_party/mbedtls/config_enable_tls13.h;-GNinja;<SOURCE_DIR><SOURCE_SUBDIR>'
+cmd='/usr/bin/cmake;-DENABLE_PROGRAMS=OFF;-DENABLE_TESTING=OFF;-DDISABLE_PACKAGE_CONFIG_AND_INSTALL=ON;-DMBEDTLS_USER_CONFIG_FILE=/home/opbrid/checkout/everest_main/evlibiso15118/3rd_party/mbedtls/config_enable_tls13.h;-GNinja;<SOURCE_DIR><SOURCE_SUBDIR>'

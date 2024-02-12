@@ -3,9 +3,9 @@
 # No other meaning or use of this file is supported.
 
 method=git
-command=/usr/bin/cmake;-P;/home/opbrid/checkout/everest_main/libiso15118/build/3rd_party/mbedtls/custom_mbedtls-prefix/tmp/custom_mbedtls-gitclone.cmake
-source_dir=/home/opbrid/checkout/everest_main/libiso15118/build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls
-work_dir=/home/opbrid/checkout/everest_main/libiso15118/build/3rd_party/mbedtls/custom_mbedtls-prefix/src
+command=/usr/bin/cmake;-P;/home/opbrid/checkout/everest_main/evlibiso15118/build/3rd_party/mbedtls/custom_mbedtls-prefix/tmp/custom_mbedtls-gitclone.cmake
+source_dir=/home/opbrid/checkout/everest_main/evlibiso15118/build/3rd_party/mbedtls/custom_mbedtls-prefix/src/custom_mbedtls
+work_dir=/home/opbrid/checkout/everest_main/evlibiso15118/build/3rd_party/mbedtls/custom_mbedtls-prefix/src
 repository=https://github.com/Mbed-TLS/mbedtls.git
 remote=origin
 init_submodules=TRUE

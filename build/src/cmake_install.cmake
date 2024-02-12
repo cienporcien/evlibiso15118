@@ -1,4 +1,4 @@
-# Install script for directory: /home/opbrid/checkout/everest_main/libiso15118/src
+# Install script for directory: /home/opbrid/checkout/everest_main/evlibiso15118/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,11 +44,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/opbrid/checkout/everest_main/libiso15118/build/src/exi/cmake_install.cmake")
+  include("/home/opbrid/checkout/everest_main/evlibiso15118/build/src/exi/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/opbrid/checkout/everest_main/libiso15118/build/src/iso15118/cmake_install.cmake")
+  include("/home/opbrid/checkout/everest_main/evlibiso15118/build/src/iso15118/cmake_install.cmake")
 endif()
 

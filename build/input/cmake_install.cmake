@@ -1,4 +1,4 @@
-# Install script for directory: /home/opbrid/checkout/everest_main/libiso15118/input
+# Install script for directory: /home/opbrid/checkout/everest_main/evlibiso15118/input
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
