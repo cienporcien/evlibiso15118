@@ -1087,7 +1087,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "iso15118 library suite"
+			"value" : "eviso15118 library suite"
 		},
 		{
 			"name" : "CMAKE_PROJECT_HOMEPAGE_URL",
@@ -1111,7 +1111,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "iso15118"
+			"value" : "eviso15118"
 		},
 		{
 			"name" : "CMAKE_PROJECT_VERSION",
@@ -1552,6 +1552,42 @@
 			],
 			"type" : "PATH",
 			"value" : "/home/opbrid/checkout/everest_main/everest-cmake"
+		},
+		{
+			"name" : "eviso15118_BINARY_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/home/opbrid/checkout/everest_main/evlibiso15118/build"
+		},
+		{
+			"name" : "eviso15118_IS_TOP_LEVEL",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "ON"
+		},
+		{
+			"name" : "eviso15118_SOURCE_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Value Computed by CMake"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "/home/opbrid/checkout/everest_main/evlibiso15118"
 		},
 		{
 			"name" : "fsm_BINARY_DIR",

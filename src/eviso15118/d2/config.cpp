@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
 #include <iso15118/d2/config.hpp>
-
+ 
 namespace iso15118::d2 {
 
 SessionConfig::SessionConfig() {

@@ -189,13 +189,13 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_DESCRIPTION:STATIC=iso15118 library suite
+CMAKE_PROJECT_DESCRIPTION:STATIC=eviso15118 library suite
 
 //Value Computed by CMake
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=iso15118
+CMAKE_PROJECT_NAME:STATIC=eviso15118
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION:STATIC=0.1
@@ -292,6 +292,15 @@ OPT_AUTODOWNLOAD_ISO20_SCHEMAS:BOOL=OFF
 
 //The directory containing a CMake configuration file for everest-cmake.
 everest-cmake_DIR:PATH=/home/opbrid/checkout/everest_main/everest-cmake
+
+//Value Computed by CMake
+eviso15118_BINARY_DIR:STATIC=/home/opbrid/checkout/everest_main/evlibiso15118/build
+
+//Value Computed by CMake
+eviso15118_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+eviso15118_SOURCE_DIR:STATIC=/home/opbrid/checkout/everest_main/evlibiso15118
 
 //Value Computed by CMake
 fsm_BINARY_DIR:STATIC=/home/opbrid/checkout/everest_main/evlibiso15118/build/src/iso15118/libfsm

@@ -7,14 +7,14 @@ endif()
 
 find_package(Threads REQUIRED)
 
-add_library(iso15118)
-add_library(iso15118::iso15118 ALIAS iso15118)
-target_include_directories(iso15118
+add_library(eviso15118)
+add_library(eviso15118::eviso15118 ALIAS eviso15118)
+target_include_directories(eviso15118
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
 
-target_sources(iso15118
+target_sources(eviso15118
     PRIVATE
         misc/helper.cpp
         misc/cb_exi.cpp
@@ -153,7 +153,7 @@ else ()
     )
 endif ()
 
-target_link_libraries(iso15118
+target_link_libraries(eviso15118
     PUBLIC
         # FIXME (aw): would be nice if we could make this private!
         fsm::fsm

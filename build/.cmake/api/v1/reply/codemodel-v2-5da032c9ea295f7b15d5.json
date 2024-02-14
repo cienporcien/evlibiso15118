@@ -159,7 +159,7 @@
 						6,
 						7
 					],
-					"name" : "iso15118",
+					"name" : "eviso15118",
 					"targetIndexes" : 
 					[
 						0,
@@ -211,7 +211,7 @@
 				{
 					"directoryIndex" : 7,
 					"id" : "iso15118::@a18e7ef967d85540fa05",
-					"jsonFile" : "target-iso15118-Debug-9c9b29364026ba4d7ae3.json",
+					"jsonFile" : "target-iso15118-Debug-0ad44b946267921094e0.json",
 					"name" : "iso15118",
 					"projectIndex" : 0
 				}

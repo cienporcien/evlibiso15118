@@ -8,7 +8,7 @@
 #include <string>
 #include <variant>
 
-namespace iso15118::session {
+namespace eviso15118::session {
 
 namespace logging {
 
