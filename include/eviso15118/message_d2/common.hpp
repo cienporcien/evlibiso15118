@@ -7,7 +7,7 @@
 #include <optional>
 #include <string>
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 const uint8_t SESSION_ID_LENGTH = 8;
 
@@ -241,4 +241,4 @@ RationalNumber from_float(float in);
 
 std::string from_Protocol(const Protocol& in);
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

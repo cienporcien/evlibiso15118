@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 struct SessionStopRequest {
     Header header;
@@ -21,4 +21,4 @@ struct SessionStopResponse {
     ResponseCode response_code;
 };
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

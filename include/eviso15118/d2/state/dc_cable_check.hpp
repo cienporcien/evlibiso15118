@@ -4,7 +4,7 @@
 
 #include "../fsm.hpp"
 
-namespace iso15118::d2::state {
+namespace eviso15118::d2::state {
 
 struct DC_CableCheck : public FsmSimpleState {
     using FsmSimpleState::FsmSimpleState;
@@ -18,4 +18,4 @@ private:
     bool cable_check_done{false};
 };
 
-} // namespace iso15118::d2::state
+} // namespace eviso15118::d2::state

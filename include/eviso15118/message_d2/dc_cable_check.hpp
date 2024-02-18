@@ -4,7 +4,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 struct DC_CableCheckRequest {
     Header header;
@@ -20,4 +20,4 @@ struct DC_CableCheckResponse {
     Processing processing;
 };
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

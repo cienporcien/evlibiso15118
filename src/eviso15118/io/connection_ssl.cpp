@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/io/connection_ssl.hpp>
+#include <eviso15118/io/connection_ssl.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -14,10 +14,10 @@
 #include "mbedtls/net_sockets.h"
 #include "mbedtls/ssl.h"
 
-#include <iso15118/detail/helper.hpp>
-#include <iso15118/detail/io/socket_helper.hpp>
+#include <eviso15118/detail/helper.hpp>
+#include <eviso15118/detail/io/socket_helper.hpp>
 
-namespace iso15118::io {
+namespace eviso15118::io {
 
 struct SSLContext {
     SSLContext();
@@ -285,4 +285,4 @@ void ConnectionSSL::close() {
     mbedtls_ssl_free(&ssl->ssl);
 }
 
-} // namespace iso15118::io
+} // namespace eviso15118::io

@@ -3,9 +3,9 @@
 #pragma once
 
 #include "../fsm.hpp"
-#include <iso15118/message_d2/authorization.hpp>
+#include <eviso15118/message_d2/authorization.hpp>
 
-namespace iso15118::d2::state {
+namespace eviso15118::d2::state {
 
 struct Authorization : public FsmSimpleState {
     using FsmSimpleState::FsmSimpleState;
@@ -19,4 +19,4 @@ private:
     bool DoneOnce = false;
 };
 
-} // namespace iso15118::d2::state
+} // namespace eviso15118::d2::state

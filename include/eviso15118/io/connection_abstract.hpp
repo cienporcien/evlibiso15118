@@ -7,7 +7,7 @@
 
 #include "ipv6_endpoint.hpp"
 
-namespace iso15118::io {
+namespace eviso15118::io {
 
 enum class ConnectionEvent {
     ACCEPTED,
@@ -35,4 +35,4 @@ struct IConnection {
 
     virtual ~IConnection() = default;
 };
-} // namespace iso15118::io
+} // namespace eviso15118::io

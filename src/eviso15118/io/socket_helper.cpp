@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/detail/io/socket_helper.hpp>
+#include <eviso15118/detail/io/socket_helper.hpp>
 
 #include <cstring>
 
@@ -8,9 +8,9 @@
 #include <net/if.h>
 #include <netdb.h>
 
-#include <iso15118/detail/helper.hpp>
+#include <eviso15118/detail/helper.hpp>
 
-namespace iso15118::io {
+namespace eviso15118::io {
 bool get_first_sockaddr_in6_for_interface(const std::string& interface_name, sockaddr_in6& address) {
     struct ifaddrs* if_list_head;
     const auto get_if_addrs_result = getifaddrs(&if_list_head);
@@ -63,4 +63,4 @@ std::unique_ptr<char[]> sockaddr_in6_to_name(const sockaddr_in6& address) {
         return nullptr;
     }
 }
-} // namespace iso15118::io
+} // namespace eviso15118::io

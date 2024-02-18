@@ -4,7 +4,7 @@
 
 #include "../fsm.hpp"
 
-namespace iso15118::d2::state {
+namespace eviso15118::d2::state {
 
 struct DC_WeldingDetection : public FsmSimpleState {
     using FsmSimpleState::FsmSimpleState;
@@ -17,4 +17,4 @@ private:
     float present_voltage{0};
 };
 
-} // namespace iso15118::d2::state
+} // namespace eviso15118::d2::state

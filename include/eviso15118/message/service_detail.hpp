@@ -8,7 +8,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 struct ServiceDetailRequest {
     Header header;
@@ -38,4 +38,4 @@ struct ServiceDetailResponse {
     std::vector<ParameterSet> service_parameter_list = {ParameterSet()};
 };
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

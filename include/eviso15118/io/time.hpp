@@ -4,7 +4,7 @@
 
 #include <chrono>
 
-namespace iso15118 {
+namespace eviso15118 {
 
 using TimePoint = std::chrono::steady_clock::time_point;
 
@@ -28,4 +28,4 @@ inline int32_t get_timeout_ms_until(const TimePoint& until, int32_t max_timeout_
     }
 }
 
-} // namespace iso15118
+} // namespace eviso15118

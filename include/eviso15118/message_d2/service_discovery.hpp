@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 //RDB Added from v2G.hpp of everest EVSEv2g
 #define ServiceScope_CHARACTER_SIZE 65
@@ -62,4 +62,4 @@ struct ServiceDiscoveryResponse {
     std::optional<std::vector<PaymentOption>> payment_option_list;
 };
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

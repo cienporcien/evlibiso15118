@@ -2,9 +2,9 @@
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
 #include <catch2/catch_test_macros.hpp>
 
-#include <iso15118/detail/d20/state/schedule_exchange.hpp>
+#include <eviso15118/detail/d20/state/schedule_exchange.hpp>
 
-using namespace iso15118;
+using namespace eviso15118;
 
 SCENARIO("Schedule Exchange state handling") {
 

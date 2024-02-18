@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/io/sdp_server.hpp>
+#include <eviso15118/io/sdp_server.hpp>
 
 #include <cstring>
 
@@ -9,9 +9,9 @@
 
 #include <exi/cb/exi_v2gtp.h>
 
-#include <iso15118/detail/helper.hpp>
+#include <eviso15118/detail/helper.hpp>
 
-namespace iso15118 {
+namespace eviso15118 {
 
 static void log_peer_hostname(const struct sockaddr_in6& address) {
     char hostname[128];
@@ -164,4 +164,4 @@ void parse_sdp_request(uint8_t* packet) {
 #endif
 } // namespace io
 
-} // namespace iso15118
+} // namespace eviso15118

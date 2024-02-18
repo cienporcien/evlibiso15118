@@ -9,12 +9,12 @@
 #include <string>
 
 // FIXME (aw): we only need the payload types from sdp.hpp, this could be shared in a separate header file
-#include <iso15118/io/sdp.hpp>
-#include <iso15118/io/stream_view.hpp>
+#include <eviso15118/io/sdp.hpp>
+#include <eviso15118/io/stream_view.hpp>
 
 #include "type.hpp"
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 class Variant {
 public:
@@ -50,4 +50,4 @@ private:
     Type type{Type::None};
     std::string error;
 };
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

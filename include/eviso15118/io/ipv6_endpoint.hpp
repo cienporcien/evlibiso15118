@@ -4,11 +4,11 @@
 
 #include <cstdint>
 
-namespace iso15118::io {
+namespace eviso15118::io {
 
 struct Ipv6EndPoint {
     uint16_t port;
     uint16_t address[8];
 };
 
-} // namespace iso15118::io
+} // namespace eviso15118::io

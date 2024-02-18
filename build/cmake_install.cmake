@@ -44,11 +44,6 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/opbrid/checkout/everest_main/evlibiso15118/build/3rd_party/cmake_install.cmake")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for the subdirectory.
   include("/home/opbrid/checkout/everest_main/evlibiso15118/build/input/cmake_install.cmake")
 endif()
 

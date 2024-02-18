@@ -8,9 +8,9 @@
 #include <variant>
 #include <vector>
 
-#include <iso15118/message_d2/common.hpp>
+#include <eviso15118/message_d2/common.hpp>
 
-namespace iso15118::d2 {
+namespace eviso15118::d2 {
 
 struct OfferedServices {
 
@@ -115,4 +115,4 @@ private:
     SelectedVasParameter selected_vas_services;
 };
 
-} // namespace iso15118::d2
+} // namespace eviso15118::d2

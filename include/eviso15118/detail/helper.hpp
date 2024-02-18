@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <string>
 
-namespace iso15118 {
+namespace eviso15118 {
 
 void logf(const char* fmt, ...);
 
@@ -28,4 +28,4 @@ template <typename CallbackType, typename... Args> bool call_if_available(const 
     return true;
 }
 
-} // namespace iso15118
+} // namespace eviso15118

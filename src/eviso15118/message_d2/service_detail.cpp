@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/message_d2/service_detail.hpp>
+#include <eviso15118/message_d2/service_detail.hpp>
 
 #include <type_traits>
 
-#include <iso15118/detail/variant_access_d2.hpp>
+#include <eviso15118/detail/variant_access_d2.hpp>
 
 #include <exi/cb/iso20_CommonMessages_Encoder.h>
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 // todo(sl): refactor in header file
 // default
@@ -193,4 +193,4 @@ template <> size_t serialize(const ServiceDetailResponse& in, const io::StreamOu
     return serialize_helper(in, out);
 }
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

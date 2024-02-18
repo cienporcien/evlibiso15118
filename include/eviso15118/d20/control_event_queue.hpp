@@ -8,7 +8,7 @@
 
 #include "control_event.hpp"
 
-namespace iso15118::d20 {
+namespace eviso15118::d20 {
 
 class ControlEventQueue {
 public:
@@ -20,4 +20,4 @@ private:
     std::mutex mutex;
 };
 
-} // namespace iso15118::d20
+} // namespace eviso15118::d20

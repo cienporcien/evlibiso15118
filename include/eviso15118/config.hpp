@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace iso15118::config {
+namespace eviso15118::config {
 
 enum class TlsNegotiationStrategy {
     ACCEPT_CLIENT_OFFER,
@@ -23,4 +23,4 @@ struct SSLConfig {
     bool enable_ssl_logging { false };
 };
 
-} // namespace iso15118::config
+} // namespace eviso15118::config

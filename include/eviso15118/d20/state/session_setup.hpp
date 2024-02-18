@@ -5,7 +5,7 @@
 
 #include "../fsm.hpp"
 
-namespace iso15118::d20::state {
+namespace eviso15118::d20::state {
 
 struct SessionSetup : public FsmSimpleState {
     using FsmSimpleState::FsmSimpleState;
@@ -18,4 +18,4 @@ private:
     std::string evse_id;
 };
 
-} // namespace iso15118::d20::state
+} // namespace eviso15118::d20::state

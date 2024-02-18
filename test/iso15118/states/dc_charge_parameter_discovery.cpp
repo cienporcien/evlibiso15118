@@ -2,9 +2,9 @@
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
 #include <catch2/catch_test_macros.hpp>
 
-#include <iso15118/detail/d20/state/dc_charge_parameter_discovery.hpp>
+#include <eviso15118/detail/d20/state/dc_charge_parameter_discovery.hpp>
 
-using namespace iso15118;
+using namespace eviso15118;
 
 using DC_ModeReq = message_20::DC_ChargeParameterDiscoveryRequest::DC_CPDReqEnergyTransferMode;
 using BPT_DC_ModeReq = message_20::DC_ChargeParameterDiscoveryRequest::BPT_DC_CPDReqEnergyTransferMode;

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/session/logger.hpp>
+#include <eviso15118/session/logger.hpp>
 
-#include <iso15118/detail/helper.hpp>
+#include <eviso15118/detail/helper.hpp>
 
-static iso15118::session::logging::Callback session_log_callback{nullptr};
+static eviso15118::session::logging::Callback session_log_callback{nullptr};
 
-namespace iso15118::session {
+namespace eviso15118::session {
 
 SessionLogger::SessionLogger(void* id_) : id(reinterpret_cast<std::uintptr_t>(id_)){};
 
@@ -58,4 +58,4 @@ void set_session_log_callback(const logging::Callback& callback) {
 }
 } // namespace logging
 
-} // namespace iso15118::session
+} // namespace eviso15118::session

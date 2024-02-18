@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/detail/helper.hpp>
+#include <eviso15118/detail/helper.hpp>
 
 #include <cerrno>
 #include <cstdio>
@@ -9,7 +9,7 @@
 
 #include <mbedtls/error.h>
 
-namespace iso15118 {
+namespace eviso15118 {
 
 void log_and_throw(const char* msg) {
     throw std::runtime_error(std::string(msg) + " (reason: " + strerror(errno) + ")");
@@ -25,4 +25,4 @@ void log_and_raise_mbed_error(const std::string& error_msg, int error_code) {
     log_and_raise(error_msg + " (" + mbed_error_msg + ")");
 }
 
-} // namespace iso15118
+} // namespace eviso15118

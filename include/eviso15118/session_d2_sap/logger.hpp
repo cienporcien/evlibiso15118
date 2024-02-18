@@ -8,7 +8,7 @@
 #include <string>
 #include <variant>
 
-namespace iso15118::session_2_sap {
+namespace eviso15118::session_2_sap {
 
 namespace logging {
 
@@ -54,4 +54,4 @@ private:
     std::string last_state_name;
 };
 
-} // namespace iso15118::session_2_sap
+} // namespace eviso15118::session_2_sap

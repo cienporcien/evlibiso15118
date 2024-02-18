@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace iso15118::io::v2gtp {
+namespace eviso15118::io::v2gtp {
 enum class Security : uint8_t {
     TLS = 0x00,
     NO_TRANSPORT_SECURITY = 0x10,
@@ -24,4 +24,4 @@ enum class PayloadType : uint16_t {
     Part20DC = 0x8004,
 };
 
-} // namespace iso15118::io::v2gtp
+} // namespace eviso15118::io::v2gtp

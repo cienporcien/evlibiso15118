@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 struct ServiceDiscoveryRequest {
     Header header;
@@ -30,4 +30,4 @@ struct ServiceDiscoveryResponse {
     std::optional<std::vector<Service>> vas_list;
 };
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

@@ -4,9 +4,9 @@
 
 // FIXME (aw): how to streamline this with type.hpp?
 
-#include <iso15118/io/sdp.hpp>
+#include <eviso15118/io/sdp.hpp>
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 template <typename T> struct PayloadTypeTrait;
 
@@ -45,4 +45,4 @@ CREATE_TYPE_TRAIT(SessionStopResponse, Part20Main);
 #undef CREATE_TYPE_TRAIT
 #endif
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

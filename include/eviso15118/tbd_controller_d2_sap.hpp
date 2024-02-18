@@ -14,7 +14,7 @@
 
 #include "message_d2_sap/common.hpp"
 
-namespace iso15118 {
+namespace eviso15118 {
 
 
 //RDB Parallel universe for iso-2
@@ -61,4 +61,4 @@ private:
     const session_2_sap::feedback::Callbacks callbacks;
 };
 
-} // namespace iso15118
+} // namespace eviso15118

@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/session/iso.hpp>
+#include <eviso15118/session/iso.hpp>
 
 #include <cassert>
 #include <cstring>
 
-#include <iso15118/d20/state/session_setup.hpp>
+#include <eviso15118/d20/state/session_setup.hpp>
 
-#include <iso15118/detail/helper.hpp>
+#include <eviso15118/detail/helper.hpp>
 
-namespace iso15118 {
+namespace eviso15118 {
 
 static constexpr auto SESSION_IDLE_TIMEOUT_MS = 5000;
 
-static void log_sdp_packet(const iso15118::io::SdpPacket& sdp) {
+static void log_sdp_packet(const eviso15118::io::SdpPacket& sdp) {
     static constexpr auto ESCAPED_BYTE_CHAR_COUNT = 4;
     auto payload_string_buffer = std::make_unique<char[]>(sdp.get_payload_length() * ESCAPED_BYTE_CHAR_COUNT + 1);
     for (auto i = 0; i < sdp.get_payload_length(); ++i) {
@@ -21,15 +21,15 @@ static void log_sdp_packet(const iso15118::io::SdpPacket& sdp) {
                  sdp.get_payload_buffer()[i]);
     }
 
-    iso15118::logf("[SDP Packet in]: Header: %04hx, Payload: %s", sdp.get_payload_type(), payload_string_buffer.get());
+    eviso15118::logf("[SDP Packet in]: Header: %04hx, Payload: %s", sdp.get_payload_type(), payload_string_buffer.get());
 }
 
-static void log_packet_from_car(const iso15118::io::SdpPacket& packet, session::SessionLogger& logger) {
+static void log_packet_from_car(const eviso15118::io::SdpPacket& packet, session::SessionLogger& logger) {
     logger.exi(static_cast<uint16_t>(packet.get_payload_type()), packet.get_payload_buffer(),
                packet.get_payload_length(), session::logging::ExiMessageDirection::FROM_EV);
 }
 
-static std::unique_ptr<message_20::Variant> make_variant_from_packet(const iso15118::io::SdpPacket& packet) {
+static std::unique_ptr<message_20::Variant> make_variant_from_packet(const eviso15118::io::SdpPacket& packet) {
     return std::make_unique<message_20::Variant>(
         packet.get_payload_type(), io::StreamInputView{packet.get_payload_buffer(), packet.get_payload_length()});
 }
@@ -97,12 +97,12 @@ bool read_single_sdp_packet(io::IConnection& connection, io::SdpPacket& sdp_pack
     return false;
 }
 
-static size_t setup_response_header(uint8_t* buffer, iso15118::io::v2gtp::PayloadType payload_type, size_t size) {
-    buffer[0] = iso15118::io::SDP_PROTOCOL_VERSION;
-    buffer[1] = iso15118::io::SDP_INVERSE_PROTOCOL_VERSION;
+static size_t setup_response_header(uint8_t* buffer, eviso15118::io::v2gtp::PayloadType payload_type, size_t size) {
+    buffer[0] = eviso15118::io::SDP_PROTOCOL_VERSION;
+    buffer[1] = eviso15118::io::SDP_INVERSE_PROTOCOL_VERSION;
 
     const uint16_t response_payload_type =
-        htobe16(static_cast<std::underlying_type_t<iso15118::io::v2gtp::PayloadType>>(payload_type));
+        htobe16(static_cast<std::underlying_type_t<eviso15118::io::v2gtp::PayloadType>>(payload_type));
 
     std::memcpy(buffer + 2, &response_payload_type, sizeof(response_payload_type));
 
@@ -110,7 +110,7 @@ static size_t setup_response_header(uint8_t* buffer, iso15118::io::v2gtp::Payloa
 
     std::memcpy(buffer + 4, &tmp32, sizeof(tmp32));
 
-    return size + iso15118::io::SdpPacket::V2GTP_HEADER_SIZE;
+    return size + eviso15118::io::SdpPacket::V2GTP_HEADER_SIZE;
 }
 
 Session::Session(std::unique_ptr<io::IConnection> connection_, const d20::SessionConfig& config,
@@ -220,4 +220,4 @@ void Session::SetSessionStateConnected(){
     state.connected=true;
 }
 
-} // namespace iso15118
+} // namespace eviso15118

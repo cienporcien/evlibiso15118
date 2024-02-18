@@ -4,7 +4,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 struct DC_PreChargeRequest {
     Header header;
@@ -21,4 +21,4 @@ struct DC_PreChargeResponse {
     RationalNumber present_voltage;
 };
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

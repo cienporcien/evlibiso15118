@@ -10,7 +10,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 struct AuthorizationSetupRequest {
     Header header;
@@ -39,4 +39,4 @@ struct AuthorizationSetupResponse {
     std::variant<EIM_ASResAuthorizationMode, PnC_ASResAuthorizationMode> authorization_mode;
 };
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

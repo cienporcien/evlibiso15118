@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/d20/control_event_queue.hpp>
+#include <eviso15118/d20/control_event_queue.hpp>
 
-namespace iso15118::d20 {
+namespace eviso15118::d20 {
 
 std::optional<ControlEvent> ControlEventQueue::pop() {
     std::lock_guard<std::mutex> lck(mutex);
@@ -23,4 +23,4 @@ void ControlEventQueue::push(ControlEvent event) {
     queue.push(std::move(event));
 }
 
-} // namespace iso15118::d20
+} // namespace eviso15118::d20

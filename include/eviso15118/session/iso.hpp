@@ -20,12 +20,12 @@
 #include <eviso15118/session/feedback.hpp>
 #include <eviso15118/session/logger.hpp>
 
-namespace iso15118 {
+namespace eviso15118 {
 
 //RDB these were never declared in an hpp file but can be reused in iso-2.
-static void log_sdp_packet(const iso15118::io::SdpPacket& sdp);
+static void log_sdp_packet(const eviso15118::io::SdpPacket& sdp);
 bool read_single_sdp_packet(io::IConnection& connection, io::SdpPacket& sdp_packet);
-static size_t setup_response_header(uint8_t* buffer, iso15118::io::v2gtp::PayloadType payload_type, size_t size);
+static size_t setup_response_header(uint8_t* buffer, eviso15118::io::v2gtp::PayloadType payload_type, size_t size);
 
 struct SessionState {
     bool connected{false};
@@ -74,4 +74,4 @@ private:
     void handle_connection_event(io::ConnectionEvent event);
 };
 
-} // namespace iso15118
+} // namespace eviso15118

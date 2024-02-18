@@ -8,7 +8,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 enum class AuthStatus {
     Accepted = 0,
@@ -49,4 +49,4 @@ struct AuthorizationResponse {
     Processing evse_processing;
 };
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

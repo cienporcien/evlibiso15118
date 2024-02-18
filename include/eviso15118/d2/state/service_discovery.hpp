@@ -4,7 +4,7 @@
 
 #include "../fsm.hpp"
 
-namespace iso15118::d2::state {
+namespace eviso15118::d2::state {
 
 struct ServiceDiscovery : public FsmSimpleState {
     using FsmSimpleState::FsmSimpleState;
@@ -14,4 +14,4 @@ struct ServiceDiscovery : public FsmSimpleState {
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
 };
 
-} // namespace iso15118::d2::state
+} // namespace eviso15118::d2::state

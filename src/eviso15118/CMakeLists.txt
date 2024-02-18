@@ -139,32 +139,22 @@ target_sources(eviso15118
         tbd_controller_d2_sap.cpp
 )
 
-if (NOT ISO15118_LINK_CUSTOM_MBEDTLS)
-    set(MBEDTLS_LINK_DEPENDENCIES
-        mbedtls
-        mbedx509
-        mbedcrypto
-    )
-else ()
-    set(MBEDTLS_LINK_DEPENDENCIES
-        mbedtls_custom
-        mbedx509_custom
-        mbedcrypto_custom
-    )
-endif ()
 
 target_link_libraries(eviso15118
     PUBLIC
         # FIXME (aw): would be nice if we could make this private!
         fsm::fsm
-    PRIVATE
-        Threads::Threads
 
         ${MBEDTLS_LINK_DEPENDENCIES}
 
-        iso15118::v2gtp
-        iso15118::exi_20
+
+    PRIVATE
+        Threads::Threads
+        # RDB - get access to the existing exi libraries in libiso15118 
+        cb_v2gtp
+        cb_iso20
+
 )
 
 # FIXME (aw): do we want to have this public here?
-target_compile_features(iso15118 PUBLIC cxx_std_17)
+target_compile_features(eviso15118 PUBLIC cxx_std_17)

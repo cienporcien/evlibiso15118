@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 struct DC_ChargeParameterDiscoveryRequest {
     Header header;
@@ -59,4 +59,4 @@ struct DC_ChargeParameterDiscoveryResponse {
     std::variant<DC_CPDResEnergyTransferMode, BPT_DC_CPDResEnergyTransferMode> transfer_mode;
 };
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

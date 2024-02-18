@@ -7,7 +7,7 @@
 #include "ipv6_endpoint.hpp"
 #include "sdp.hpp"
 
-namespace iso15118::io {
+namespace eviso15118::io {
 
 struct PeerRequestContext {
     explicit PeerRequestContext(bool valid_) : valid(valid_){};
@@ -39,4 +39,4 @@ private:
     uint8_t udp_buffer[2048];
 };
 
-} // namespace iso15118::io
+} // namespace eviso15118::io

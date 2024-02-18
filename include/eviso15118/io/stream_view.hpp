@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace iso15118::io {
+namespace eviso15118::io {
 
 struct StreamInputView {
     uint8_t const* payload;
@@ -21,4 +21,4 @@ struct StreamOutputView {
     }
 };
 
-} // namespace iso15118::io
+} // namespace eviso15118::io

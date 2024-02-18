@@ -6,10 +6,10 @@
 #include <variant>
 #include <vector>
 
-#include <iso15118/message_d2/common.hpp>
-#include <iso15118/message_d2/dc_charge_parameter_discovery.hpp>
+#include <eviso15118/message_d2/common.hpp>
+#include <eviso15118/message_d2/dc_charge_parameter_discovery.hpp>
 
-namespace iso15118::d2 {
+namespace eviso15118::d2 {
 
 struct SessionConfig {
     std::string evse_id{""};
@@ -35,4 +35,4 @@ struct SessionConfig {
     SessionConfig();
 };
 
-} // namespace iso15118::d2
+} // namespace eviso15118::d2

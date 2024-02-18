@@ -6,7 +6,7 @@
 
 #include <exi/cb/common/exi_bitstream.h>
 
-#include <iso15118/io/stream_view.hpp>
+#include <eviso15118/io/stream_view.hpp>
 
 #define CB2CPP_STRING(property) (std::string(property.characters, property.charactersLen))
 #define CPP2CB_STRING(in, out)                                                                                         \
@@ -52,10 +52,10 @@ template <typename T1, typename T2> void cb_convert_enum(const T1& in, T2& out) 
     out = static_cast<T2>(in);
 }
 
-exi_bitstream_t get_exi_input_stream(const iso15118::io::StreamInputView&);
-exi_bitstream_t get_exi_output_stream(const iso15118::io::StreamOutputView&);
+exi_bitstream_t get_exi_input_stream(const eviso15118::io::StreamInputView&);
+exi_bitstream_t get_exi_output_stream(const eviso15118::io::StreamOutputView&);
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 template <typename MessageType> int serialize_to_exi(const MessageType& in, exi_bitstream_t& out);
 
@@ -72,10 +72,10 @@ size_t serialize_helper(const MessageType& in, const io::StreamOutputView& strea
     return exi_bitstream_get_length(&out);
 }
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20
 
 //RDB - should this be in a message 2 hpp?
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 template <typename MessageType> int serialize_to_exi(const MessageType& in, exi_bitstream_t& out);
 
@@ -92,10 +92,10 @@ size_t serialize_helper(const MessageType& in, const io::StreamOutputView& strea
     return exi_bitstream_get_length(&out);
 }
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2
 
 //RDB - should this be in a message 2 sap hpp?
-namespace iso15118::message_2_sap {
+namespace eviso15118::message_2_sap {
 
 template <typename MessageType> int serialize_to_exi(const MessageType& in, exi_bitstream_t& out);
 
@@ -112,4 +112,4 @@ size_t serialize_helper(const MessageType& in, const io::StreamOutputView& strea
     return exi_bitstream_get_length(&out);
 }
 
-} // namespace iso15118::message_2_sap
+} // namespace eviso15118::message_2_sap

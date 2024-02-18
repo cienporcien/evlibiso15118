@@ -6,7 +6,7 @@
 
 
 //RDB parallel iso-2
-namespace iso15118::session_2 {
+namespace eviso15118::session_2 {
 
 namespace feedback {
 
@@ -53,4 +53,4 @@ private:
     feedback::Callbacks callbacks;
 };
 
-} // namespace iso15118::session_2
+} // namespace eviso15118::session_2

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
-#include <iso15118/io/logging.hpp>
+#include <eviso15118/io/logging.hpp>
 
 #include <cstdarg>
 #include <cstdio>
@@ -8,7 +8,7 @@
 
 static std::function<void(std::string)> logging_callback = [](const std::string& msg) { std::cout << msg; };
 
-namespace iso15118 {
+namespace eviso15118 {
 
 void log(const std::string& msg) {
     logging_callback(msg);
@@ -39,4 +39,4 @@ void set_logging_callback(const std::function<void(std::string)>& callback) {
 }
 } // namespace io
 
-} // namespace iso15118
+} // namespace eviso15118

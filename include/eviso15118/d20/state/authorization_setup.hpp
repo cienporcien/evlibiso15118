@@ -4,7 +4,7 @@
 
 #include "../fsm.hpp"
 
-namespace iso15118::d20::state {
+namespace eviso15118::d20::state {
 
 struct AuthorizationSetup : public FsmSimpleState {
     using FsmSimpleState::FsmSimpleState;
@@ -14,4 +14,4 @@ struct AuthorizationSetup : public FsmSimpleState {
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
 };
 
-} // namespace iso15118::d20::state
+} // namespace eviso15118::d20::state

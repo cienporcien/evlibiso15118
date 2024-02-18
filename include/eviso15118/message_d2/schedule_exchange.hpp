@@ -10,7 +10,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 struct ScheduleExchangeRequest {
 
@@ -202,4 +202,4 @@ struct ScheduleExchangeResponse {
     std::variant<Dynamic_SEResControlMode, Scheduled_SEResControlMode> control_mode;
 };
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

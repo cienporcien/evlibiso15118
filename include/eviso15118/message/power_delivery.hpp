@@ -8,7 +8,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 struct PowerDeliveryRequest {
     enum class Progress {
@@ -66,4 +66,4 @@ struct PowerDeliveryResponse {
     std::optional<EvseStatus> status;
 };
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

@@ -3,9 +3,9 @@
 #pragma once
 
 #include "../fsm.hpp"
-#include <iso15118/message/authorization.hpp>
+#include <eviso15118/message/authorization.hpp>
 
-namespace iso15118::d20::state {
+namespace eviso15118::d20::state {
 
 struct Authorization : public FsmSimpleState {
     using FsmSimpleState::FsmSimpleState;
@@ -18,4 +18,4 @@ private:
     message_20::AuthStatus authorization_status{message_20::AuthStatus::Pending};
 };
 
-} // namespace iso15118::d20::state
+} // namespace eviso15118::d20::state

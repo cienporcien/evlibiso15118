@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
 
-#include <iso15118/session_d2/feedback.hpp>
+#include <eviso15118/session_d2/feedback.hpp>
 
-#include <iso15118/detail/helper.hpp>
+#include <eviso15118/detail/helper.hpp>
 
-namespace iso15118::session_2 {
+namespace eviso15118::session_2 {
 
 Feedback::Feedback(feedback::Callbacks callbacks_) : callbacks(std::move(callbacks_)) {
 }
@@ -22,5 +22,5 @@ void Feedback::dc_max_limits(const feedback::DcMaximumLimits& max_limits) const 
     call_if_available(callbacks.dc_max_limits, max_limits);
 }
 
-} // namespace iso15118::session
+} // namespace eviso15118::session
 

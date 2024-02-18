@@ -14,7 +14,7 @@
 
 #include "message/common.hpp"
 
-namespace iso15118 {
+namespace eviso15118 {
 
 struct TbdConfig {
     config::SSLConfig ssl{config::CertificateBackend::EVEREST_LAYOUT, ""};
@@ -56,4 +56,4 @@ private:
     const session::feedback::Callbacks callbacks;
 };
 
-} // namespace iso15118
+} // namespace eviso15118

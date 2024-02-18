@@ -7,7 +7,7 @@
 
 #include "sdp.hpp"
 
-namespace iso15118::io {
+namespace eviso15118::io {
 
 // FIXME (aw): these shouldn't be necessary public - but nice to have
 static constexpr uint8_t SDP_PROTOCOL_VERSION = 0x01;
@@ -70,4 +70,4 @@ private:
     size_t length; // length includes V2GTP_HEADER_SIZE
 };
 
-} // namespace iso15118::io
+} // namespace eviso15118::io

@@ -26,11 +26,11 @@ if (EVISO15118_BUILD_TESTS)
     add_subdirectory(test)
 endif()
 
-if (ISO15118_INSTALL)
+if (EVISO15118_INSTALL)
     install(
         TARGETS
-            ev_iso15118
-        EXPORT ev_iso15118-targets
+            eviso15118
+        EXPORT eviso15118-targets
     )
 
     install(
@@ -40,8 +40,8 @@ if (ISO15118_INSTALL)
     )
 
     evc_setup_package(
-        NAME ev_iso15118
-        EXPORT ev_iso15118-targets
-        NAMESPACE ev_iso15118
+        NAME eviso15118
+        EXPORT eviso15118-targets
+        NAMESPACE eviso15118
     )
 endif()

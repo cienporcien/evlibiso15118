@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 struct ServiceSelectionRequest {
     struct SelectedService {
@@ -25,4 +25,4 @@ struct ServiceSelectionResponse {
     ResponseCode response_code;
 };
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

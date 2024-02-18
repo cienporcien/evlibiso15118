@@ -6,7 +6,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_20 {
+namespace eviso15118::message_20 {
 
 struct SessionSetupRequest {
     Header header;
@@ -19,4 +19,4 @@ struct SessionSetupResponse {
     std::string evseid;
 };
 
-} // namespace iso15118::message_20
+} // namespace eviso15118::message_20

@@ -54,5 +54,5 @@ private:
     std::string last_state_name;
 };
 
-} // namespace iso15118::session
+} // namespace eviso15118::session
 

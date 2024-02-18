@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 
-namespace iso15118::message_2 {
+namespace eviso15118::message_2 {
 
 struct DC_ChargeLoopRequest {
     struct DisplayParameters {
@@ -134,4 +134,4 @@ struct DC_ChargeLoopResponse {
         control_mode = Scheduled_DC_CLResControlMode();
 };
 
-} // namespace iso15118::message_2
+} // namespace eviso15118::message_2

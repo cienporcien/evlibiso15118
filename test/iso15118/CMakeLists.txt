@@ -10,5 +10,5 @@ add_subdirectory(states)
 #
 # target_link_libraries(secc
 #     PRIVATE
-#         iso15118::iso15118
+#         eviso15118iso15118
 # )
