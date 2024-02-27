@@ -27,6 +27,8 @@ struct IConnection {
     virtual void set_event_callback(const ConnectionEventCallback&) = 0;
 
     virtual Ipv6EndPoint get_public_endpoint() const = 0;
+    virtual void set_public_endpoint(const Ipv6EndPoint&) = 0;
+
 
     virtual void write(const uint8_t* buf, size_t len) = 0;
     virtual ReadResult read(uint8_t* buf, size_t len) = 0;

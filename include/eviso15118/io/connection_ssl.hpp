@@ -14,10 +14,11 @@ namespace eviso15118::io {
 struct SSLContext;
 class ConnectionSSL : public IConnection {
 public:
-    ConnectionSSL(PollManager&, const std::string& interface_name, const config::SSLConfig&);
+    ConnectionSSL(PollManager&, const std::string& interface_name, const config::SSLConfig&, const io::Ipv6EndPoint& end_point);
 
     void set_event_callback(const ConnectionEventCallback&) final;
     Ipv6EndPoint get_public_endpoint() const final;
+    void set_public_endpoint(const Ipv6EndPoint&) final;
 
     void write(const uint8_t* buf, size_t len) final;
     ReadResult read(uint8_t* buf, size_t len) final;

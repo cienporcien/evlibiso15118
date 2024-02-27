@@ -36,6 +36,25 @@ private:
     bool authorized;
 };
 
-using ControlEvent = std::variant<CableCheckFinished, PresentVoltageCurrent, AuthorizationResponse>;
+enum start_stop_charging{
+    STOP_CHARGING = 0,
+    START_CHARGING,
+    PAUSE_CHARGING,
+};
 
-} // namespace eviso15118::d20
+class StartStopCharging {
+public:
+    explicit StartStopCharging(start_stop_charging start_) : start(start_) {
+    }
+
+    operator start_stop_charging() const {
+        return start;
+    }
+
+private:
+    start_stop_charging start;
+};
+
+using ControlEvent = std::variant<CableCheckFinished, PresentVoltageCurrent, AuthorizationResponse, StartStopCharging>;
+
+} // namespace eviso15118d20

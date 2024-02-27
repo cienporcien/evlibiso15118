@@ -5,7 +5,7 @@
 #include <cassert>
 #include <cstring>
 
-#include <eviso15118/d20/state/session_setup.hpp>
+#include <eviso15118/d20/state/supported_app_protocol.hpp>
 
 #include <eviso15118/detail/helper.hpp>
 
@@ -121,8 +121,8 @@ Session::Session(std::unique_ptr<io::IConnection> connection_, const d20::Sessio
 
     next_session_event = offset_time_point_by_ms(get_current_time_point(), SESSION_IDLE_TIMEOUT_MS);
     connection->set_event_callback([this](io::ConnectionEvent event) { this->handle_connection_event(event); });
-    //RDB start the state machine in SessionSetup
-    fsm.reset<d20::state::SessionSetup>(ctx);
+    //RDB start the state machine in SAP
+    fsm.reset<d20::state::SupportedAppProtocol>(ctx);
 }
 
 Session::~Session() = default;

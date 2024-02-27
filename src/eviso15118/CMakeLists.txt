@@ -139,6 +139,19 @@ target_sources(eviso15118
         tbd_controller_d2_sap.cpp
 )
 
+if (NOT ISO15118_LINK_CUSTOM_MBEDTLS)
+    set(MBEDTLS_LINK_DEPENDENCIES
+        mbedtls
+        mbedx509
+        mbedcrypto
+    )
+else ()
+    set(MBEDTLS_LINK_DEPENDENCIES
+        mbedtls_custom
+        mbedx509_custom
+        mbedcrypto_custom
+    )
+endif ()
 
 target_link_libraries(eviso15118
     PUBLIC

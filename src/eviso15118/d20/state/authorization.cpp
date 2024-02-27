@@ -87,7 +87,7 @@ FsmSimpleState::HandleEventReturnType Authorization::handle_event(AllocatorType&
         } else {
             authorization_status = AuthStatus::Rejected;
         }
-
+    
         return sa.HANDLED_INTERNALLY;
     }
 

@@ -34,7 +34,7 @@ public:
 
     void setup_session(const std::vector<message_20::Authorization>& auth_services, bool cert_install_service);
 
-    //RBD allow to pass in the IConnection made by SAP
+    //RDB allow to pass in the IConnection made by SAP
     void set_SAP_IConnection(std::unique_ptr<io::IConnection>);
 
     //RDB also allow to copy the poll manager.
@@ -54,6 +54,8 @@ private:
 
     const TbdConfig config;
     const session::feedback::Callbacks callbacks;
+
+    io::Ipv6EndPoint end_point;
 };
 
 } // namespace eviso15118

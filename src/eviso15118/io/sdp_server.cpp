@@ -6,6 +6,7 @@
 
 #include <netdb.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #include <exi/cb/exi_v2gtp.h>
 
@@ -100,6 +101,59 @@ PeerRequestContext SdpServer::get_peer_request() {
     return peer_request;
 }
 
+//RDB this needs to be changed to get the response from the SECC instead of request from EVCC.
+PeerRequestContext SdpServer::get_peer_response() {
+    decltype(PeerRequestContext::address) peer_address;
+    socklen_t peer_addr_len = sizeof(peer_address);
+
+    const auto read_result = recvfrom(fd, udp_buffer, sizeof(udp_buffer), 0,
+                                      reinterpret_cast<struct sockaddr*>(&peer_address), &peer_addr_len);
+    if (read_result <= 0) {
+        log_and_throw("Read on sdp server socket failed");
+    }
+
+    if (peer_addr_len > sizeof(peer_address)) {
+        log_and_throw("Unexpected address length during read on sdp server socket");
+    }
+
+    log_peer_hostname(peer_address);
+
+    if (read_result == sizeof(udp_buffer)) {
+        logf("Read on sdp server socket succeeded, but message is to big for the buffer");
+        return PeerRequestContext{false};
+    }
+
+    uint32_t sdp_payload_len;
+    //RDB change the payload ID to response, since we are on the other side now.
+    const auto parse_sdp_result = V2GTP20_ReadHeader(udp_buffer, &sdp_payload_len, V2GTP20_SDP_RESPONSE_PAYLOAD_ID);
+
+    if (parse_sdp_result != V2GTP_ERROR__NO_ERROR) {
+        // FIXME (aw): we should not die here immediately
+        logf("Sdp server received an unexpected payload");
+        return PeerRequestContext{false};
+    }
+
+    PeerRequestContext peer_response{true};
+    bzero(&peer_response.address, sizeof(peer_response.address));
+    peer_response.address.sin6_family=AF_INET6;
+
+    // RDB get the address and port from the body.
+    // NOTE (aw): this could be moved into a constructor
+    uint8_t* sdp_response = udp_buffer + 8;
+    const uint8_t sdp_request_byte1 = sdp_response[18];
+    const uint8_t sdp_request_byte2 = sdp_response[19];
+    peer_response.security = static_cast<v2gtp::Security>(sdp_request_byte1);
+    peer_response.transport_protocol = static_cast<v2gtp::TransportProtocol>(sdp_request_byte2);
+
+    memcpy(&peer_response.address.sin6_addr, sdp_response, sizeof(peer_response.address.sin6_addr));
+    uint16_t port;
+    memcpy(&peer_response.address.sin6_port, sdp_response + 16 , sizeof(peer_response.address.sin6_port));
+    peer_response.address.sin6_scope_id=peer_address.sin6_scope_id;
+    log_peer_hostname(peer_response.address);
+
+    return peer_response;
+}
+
 void SdpServer::send_response(const PeerRequestContext& request, const Ipv6EndPoint& ipv6_endpoint) {
     // that worked, now response
     uint8_t v2g_packet[28];
@@ -121,6 +175,41 @@ void SdpServer::send_response(const PeerRequestContext& request, const Ipv6EndPo
     sendto(fd, v2g_packet, sizeof(v2g_packet), 0, reinterpret_cast<const sockaddr*>(&request.address),
            peer_addr_len);
 }
+
+// RDB - This is always the same from the EV side (or set from config), so the request and endpoint don't need to be passed in.
+// This is a UDP broadcast to port 15118 on the connected network. The sending IP address and port are included in the UDP
+// broadcast so that the receiving SDP server can return a unicast UDP message to the sender
+void SdpServer::send_request() {
+
+    PeerRequestContext request(true);
+    Ipv6EndPoint ipv6_endpoint;
+
+    // The address is:
+    //[V2G2-139]An SDP client shall send SECC Discovery Request message to the destination local-link
+    //multicast address (FF02::1) as defined in IETF RFC 4291.
+    request.address={AF_INET6, htons(15118)};
+    inet_pton(AF_INET6, "ff02::1", &request.address.sin6_addr);
+    request.security=v2gtp::Security::NO_TRANSPORT_SECURITY;
+    request.transport_protocol=v2gtp::TransportProtocol::TCP;
+
+    // The request has a payload length of 2 bytes and header of 8 bytes
+    uint8_t v2g_packet[10];
+    // Location of payload
+    uint8_t* sdp_request = v2g_packet + 8;
+
+    // FIXME (aw): which values to take here?
+    sdp_request[0] = static_cast<std::underlying_type_t<v2gtp::Security>>(request.security);
+    sdp_request[1] =
+        static_cast<std::underlying_type_t<v2gtp::TransportProtocol>>(request.transport_protocol);
+
+    V2GTP20_WriteHeader(v2g_packet, 2, V2GTP20_SDP_REQUEST_PAYLOAD_ID);
+
+    const auto peer_addr_len = sizeof(request.address);
+
+    sendto(fd, v2g_packet, sizeof(v2g_packet), 0, reinterpret_cast<const sockaddr*>(&request.address),
+           peer_addr_len);
+}
+
 
 #if 0
 

@@ -1,23 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2023 Pionix GmbH and Contributors to EVerest
 #include <eviso15118/tbd_controller.hpp>
+#include <eviso15118/d20/control_event.hpp>
 
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
 
+#include <cstring>
+
+
 #include <eviso15118/io/connection_plain.hpp>
 #include <eviso15118/io/connection_ssl.hpp>
 #include <eviso15118/session/iso.hpp>
-
+#include <eviso15118/io/sdp_server.hpp>
 #include <eviso15118/detail/helper.hpp>
 
 namespace eviso15118 {
 
-//RDB - no longer needs to handle the sdp server input.
+
 TbdController::TbdController(TbdConfig config_, session::feedback::Callbacks callbacks_) :
     config(std::move(config_)), callbacks(std::move(callbacks_)) {
-//    poll_manager.register_fd(sdp_server.get_fd(), [this]() { handle_sdp_server_input(); });
+    poll_manager.register_fd(sdp_server.get_fd(), [this]() { handle_sdp_server_input(); });
     session_config = d20::SessionConfig();
 }
 
@@ -39,12 +43,35 @@ void TbdController::loop() {
     }
 }
 
-void TbdController::send_control_event(const d20::ControlEvent& event) {
-    if (sessions.size() > 1) {
+//RDB since the EV doesn't have a session until after the SDP response is processed (see below),
+//we need a special way to handle the SDP startup event (START_CHARGING with no existing session). 
+void TbdController::send_control_event(const d20::ControlEvent &event)
+{
+    if (sessions.size() > 1)
+    {
         logf("Inconsistent state, sessions.size() > 1 -- dropping control event");
         return;
-    } else if (sessions.size() == 0) {
-        return;
+    }
+    else if (sessions.size() == 0)
+    {
+        //RDB this should only be the case if there is no session yet, and the event is a start charging event
+        if (not std::holds_alternative<d20::StartStopCharging>(event)) {
+            logf("Event Received with Inconsistent state, sessions.size() == 0 -- dropping control event");
+            return;
+        }
+        else{
+            //Get the value of the variant
+            d20::start_stop_charging ssval = std::get<d20::StartStopCharging>(event);
+            if (ssval == d20::start_stop_charging::START_CHARGING){
+                //RDB TODO what about the timeout waiting for the SDP response? Start up a timer.
+                this->sdp_server.send_request();
+                return;
+            }
+            else{ //This should not happen for PAUSE and STOP, so ignore
+                logf("Pause or Stop Charging received. Inconsistent state, sessions.size() == 0 -- dropping control event");
+                return;
+            }
+        }
     }
 
     sessions.front().push_control_event(event);
@@ -67,39 +94,35 @@ void TbdController::setup_session(const std::vector<message_20::Authorization>& 
     session_config.cert_install_service = cert_install_service;
 }
 
+//RDB This needs to be changed for the EV side. Since the EV is initiating the SDP process, in order to
+//respond to a start charging message from the ECU, it needs to initialize the first session before the first
+//sdp response comes back so we have a functional state machine. This means we don't know whether or not the EVSE supports TLS until then. 
+//Or, we can handle the SDP request process separately from the state machine (session), and set up the state machine here on the SDP reply, leaving
+//things more or less the same. This is what I did.
 void TbdController::handle_sdp_server_input() {
-    auto request = sdp_server.get_peer_request();
+    auto response = sdp_server.get_peer_response();
 
-    if (not request) {
-        return;
-    }
+    //memcpy(end_point.address, &response.address.sin6_addr, sizeof(&response.address.sin6_addr));
+    std::copy(std::begin(response.address.sin6_addr.__in6_u.__u6_addr16), std::end(response.address.sin6_addr.__in6_u.__u6_addr16), std::begin(end_point.address));
+    end_point.port=response.address.sin6_port;
+    
 
-    switch (config.tls_negotiation_strategy) {
-    case config::TlsNegotiationStrategy::ACCEPT_CLIENT_OFFER:
-        // nothing to change
-        break;
-    case config::TlsNegotiationStrategy::ENFORCE_TLS:
-        request.security = io::v2gtp::Security::TLS;
-        break;
-    case config::TlsNegotiationStrategy::ENFORCE_NO_TLS:
-        request.security = io::v2gtp::Security::NO_TRANSPORT_SECURITY;
-        break;
-    }
-
+    // RDB on the ev side, we connect with the IP, Port, and security specified in the SDP response. So, we need to pass in the address and port.  
     auto connection = [this](bool secure_connection) -> std::unique_ptr<io::IConnection> {
         if (secure_connection) {
-            return std::make_unique<io::ConnectionSSL>(poll_manager, config.interface_name, config.ssl);
+            return std::make_unique<io::ConnectionSSL>(poll_manager, config.interface_name, config.ssl, end_point);
         } else {
-            return std::make_unique<io::ConnectionPlain>(poll_manager, config.interface_name);
+            return std::make_unique<io::ConnectionPlain>(poll_manager, config.interface_name, end_point );
         }
-    }(request.security == io::v2gtp::Security::TLS);
+    }(response.security == io::v2gtp::Security::TLS);
 
     const auto ipv6_endpoint = connection->get_public_endpoint();
 
     // Todo(sl): Check if session_config is empty
     const auto& new_session = sessions.emplace_back(std::move(connection), session_config, callbacks);
 
-    sdp_server.send_response(request, ipv6_endpoint);
+    //RDB don't reply, instead go to the first state (SupportedAppRequest) by sending a control event
+    this->send_control_event(d20::StartStopCharging(d20::start_stop_charging::START_CHARGING));
 }
 
 // RBD allow to pass in the IConnection made by SAP

@@ -88,7 +88,7 @@ static void load_certificates(SSLContext& ssl, const config::SSLConfig& ssl_conf
 }
 
 ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& interface_name,
-                             const config::SSLConfig& ssl_config) :
+                             const config::SSLConfig& ssl_config, const io::Ipv6EndPoint& end_point) :
     poll_manager(poll_manager_), ssl(std::make_unique<SSLContext>()) {
 
 #if MBEDTLS_VERSION_MAJOR == 3
@@ -96,11 +96,11 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
     psa_crypto_init();
 #endif
 
+    //Convert the address and port to a sockaddr_in6
     sockaddr_in6 address;
-    if (not get_first_sockaddr_in6_for_interface(interface_name, address)) {
-        const auto msg = "Failed to get ipv6 socket address for interface " + interface_name;
-        log_and_throw(msg.c_str());
-    }
+    address.sin6_family=AF_INET6;
+    memcpy(&address.sin6_addr, end_point.address, sizeof(&address.sin6_addr));
+    address.sin6_port=end_point.port;
 
     const auto address_name = sockaddr_in6_to_name(address);
 
@@ -109,9 +109,6 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
             "Failed to determine string representation of ipv6 socket address for interface " + interface_name;
         log_and_throw(msg.c_str());
     }
-
-    end_point.port = 50000;
-    memcpy(&end_point.address, &address.sin6_addr, sizeof(address.sin6_addr));
 
     //
     // mbedtls specifica
@@ -177,6 +174,12 @@ void ConnectionSSL::set_event_callback(const ConnectionEventCallback& callback) 
 Ipv6EndPoint ConnectionSSL::get_public_endpoint() const {
     return end_point;
 }
+
+
+void ConnectionSSL::set_public_endpoint(const Ipv6EndPoint& ep) {
+    end_point=ep;
+}
+
 
 void ConnectionSSL::write(const uint8_t* buf, size_t len) {
     assert(handshake_complete);

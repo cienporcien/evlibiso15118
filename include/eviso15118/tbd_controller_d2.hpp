@@ -56,6 +56,9 @@ private:
 
     const TbdConfig_2 config;
     const session_2::feedback::Callbacks callbacks;
+
+    io::Ipv6EndPoint end_point;
+
 };
 
 } // namespace eviso15118

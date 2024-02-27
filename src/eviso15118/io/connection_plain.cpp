@@ -8,43 +8,41 @@
 #include <unistd.h>
 
 #include <thread>
+#include <net/if.h>
 
 #include <eviso15118/detail/helper.hpp>
 #include <eviso15118/detail/io/socket_helper.hpp>
 
 namespace eviso15118::io {
 
-ConnectionPlain::ConnectionPlain(PollManager& poll_manager_, const std::string& interface_name) :
-    poll_manager(poll_manager_) {
-    sockaddr_in6 address;
-    if (not get_first_sockaddr_in6_for_interface(interface_name, address)) {
-        const auto msg = "Failed to get ipv6 socket address for interface " + interface_name;
-        log_and_throw(msg.c_str());
-    }
+ConnectionPlain::ConnectionPlain(PollManager& poll_manager_, const std::string& interface_name, const io::Ipv6EndPoint& end_point_) :
+    poll_manager(poll_manager_), end_point(end_point_) {
 
-    // setup end point information
-    end_point.port = 50000;
-    memcpy(&end_point.address, &address.sin6_addr, sizeof(address.sin6_addr));
+    // setup end point information - on EV side, this was given in the SDP response.
+    //Convert the address and port to a sockaddr_in6
+    sockaddr_in6 address;
+    bzero((char *) &address, sizeof(address));
+    address.sin6_family=AF_INET6;
+    //copy was suggested instead of memcpy
+    std::copy(std::begin(end_point.address), std::end(end_point.address), std::begin(address.sin6_addr.__in6_u.__u6_addr16));
+    //Port is already in reverse, don't need to switch bytes.
+    address.sin6_port=end_point.port;
+    //need the scope_id of the interface name.
+    address.sin6_scope_id=if_nametoindex(interface_name.c_str());
 
     fd = socket(AF_INET6, SOCK_STREAM, 0);
     if (fd == -1) {
         log_and_throw("Failed to create an ipv6 socket");
     }
 
-    // before bind, set the port
-    address.sin6_port = htobe16(end_point.port);
-
-    const auto bind_result = bind(fd, reinterpret_cast<const struct sockaddr*>(&address), sizeof(address));
-    if (bind_result == -1) {
-        const auto error = "Failed to bind ipv6 socket to interface " + interface_name;
+    //On the ev side we are the client, and use connect instead of bind.
+    const auto connect_result = connect(fd, reinterpret_cast<const struct sockaddr*>(&address), sizeof(address));
+    if (connect_result == -1) {
+        const auto error = "Failed to connect ipv6 socket to interface " + interface_name + " Error= " + strerror(errno);
         log_and_throw(error.c_str());
     }
 
-    const auto listen_result = listen(fd, 0);
-    if (listen_result == -1) {
-        log_and_throw("Listen on socket failed");
-    }
-
+    //Not sure what to do here, 
     poll_manager.register_fd(fd, [this]() { this->handle_connect(); });
 }
 
@@ -56,6 +54,10 @@ void ConnectionPlain::set_event_callback(const ConnectionEventCallback& callback
 
 Ipv6EndPoint ConnectionPlain::get_public_endpoint() const {
     return end_point;
+}
+
+void ConnectionPlain::set_public_endpoint(const Ipv6EndPoint& ep) {
+    end_point=ep;
 }
 
 void ConnectionPlain::write(const uint8_t* buf, size_t len) {

@@ -121,9 +121,9 @@ void TbdController_2_sap::handle_sdp_server_input() {
 
     auto connection = [this](bool secure_connection) -> std::unique_ptr<io::IConnection> {
         if (secure_connection) {
-            return std::make_unique<io::ConnectionSSL>(poll_manager, config.interface_name, config.ssl);
+            return std::make_unique<io::ConnectionSSL>(poll_manager, config.interface_name, config.ssl, end_point);
         } else {
-            return std::make_unique<io::ConnectionPlain>(poll_manager, config.interface_name);
+            return std::make_unique<io::ConnectionPlain>(poll_manager, config.interface_name, end_point);
         }
     }(request.security == io::v2gtp::Security::TLS);
 

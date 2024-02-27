@@ -28,7 +28,14 @@ public:
     SdpServer();
     ~SdpServer();
     PeerRequestContext get_peer_request();
+
+    //RDB new for getting the SDP response from the EVSE
+    PeerRequestContext get_peer_response();
+
     void send_response(const PeerRequestContext&, const Ipv6EndPoint&);
+
+    // RDB - This is always the same (or set from config), so the request and endpoint don't need to be passed in.
+    void send_request();
 
     auto get_fd() const {
         return fd;

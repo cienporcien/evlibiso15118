@@ -59,6 +59,9 @@ private:
 
     const TbdConfig_2_sap config;
     const session_2_sap::feedback::Callbacks callbacks;
+
+    io::Ipv6EndPoint end_point;
+
 };
 
 } // namespace eviso15118
