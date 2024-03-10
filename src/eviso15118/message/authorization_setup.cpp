@@ -14,6 +14,38 @@ template <> void convert(const struct iso20_AuthorizationSetupReqType& in, Autho
     convert(in.Header, out.header);
 }
 
+//RBL Add the conversion for the response from the EVCC
+template <> void convert(const struct iso20_AuthorizationSetupResType& in, AuthorizationSetupResponse& out) {
+
+
+    cb_convert_enum(in.ResponseCode, out.response_code);
+
+    //out.authorization_services.size() = in.AuthorizationServices.arrayLen;
+
+//     uint8_t element = 0;
+//     for (auto const& service : in.authorization_services) {
+//         cb_convert_enum(service, out.AuthorizationServices.array[element++]);
+//     }
+
+//     out.CertificateInstallationService = in.certificate_installation_service;
+
+//     //std::visit(AuthorizationModeVisitor(out), in.authorization_mode);
+
+//     convert(in.header, out.Header);
+
+
+    convert(in.Header, out.header);
+    
+}
+
+
+//RDB Add conversion for the request to convert to exi
+template <> void convert(const AuthorizationSetupRequest& in, iso20_AuthorizationSetupReqType& out) {
+    init_iso20_AuthorizationSetupReqType(&out);
+
+    convert(in.header, out.Header);
+}
+
 struct AuthorizationModeVisitor {
     AuthorizationModeVisitor(iso20_AuthorizationSetupResType& out_) : out(out_){};
     void operator()(const AuthorizationSetupResponse::EIM_ASResAuthorizationMode& in) {
@@ -50,8 +82,15 @@ template <> void convert(const AuthorizationSetupResponse& in, iso20_Authorizati
     convert(in.header, out.Header);
 }
 
+
+
 template <> void insert_type(VariantAccess& va, const struct iso20_AuthorizationSetupReqType& in) {
     va.insert_type<AuthorizationSetupRequest>(in);
+};
+
+//RBL handle the response
+template <> void insert_type(VariantAccess& va, const struct iso20_AuthorizationSetupResType& in) {
+    va.insert_type<AuthorizationSetupResponse>(in);
 };
 
 template <> int serialize_to_exi(const AuthorizationSetupResponse& in, exi_bitstream_t& out) {
@@ -65,8 +104,26 @@ template <> int serialize_to_exi(const AuthorizationSetupResponse& in, exi_bitst
     return encode_iso20_exiDocument(&out, &doc);
 }
 
+//RDB output the request
+template <> int serialize_to_exi(const AuthorizationSetupRequest& in, exi_bitstream_t& out) {
+    iso20_exiDocument doc;
+    init_iso20_exiDocument(&doc);
+
+    CB_SET_USED(doc.AuthorizationSetupReq);
+
+    convert(in, doc.AuthorizationSetupReq);
+
+    return encode_iso20_exiDocument(&out, &doc);
+}
+
 template <> size_t serialize(const AuthorizationSetupResponse& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
+
+//RDB output the request
+template <> size_t serialize(const AuthorizationSetupRequest& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
 
 } // namespace eviso15118::message_20

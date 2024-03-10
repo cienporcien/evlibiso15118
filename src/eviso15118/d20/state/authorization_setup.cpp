@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2023 Pionix GmbH and Contributors to EVerest
+// Copyright 2023 Pionix GmbH and Contributors to EVereqt
 #include <random>
 
 #include <eviso15118/d20/state/authorization.hpp>
@@ -13,47 +13,27 @@
 
 namespace eviso15118::d20::state {
 
-message_20::AuthorizationSetupResponse
-handle_request(const message_20::AuthorizationSetupRequest& req, d20::Session& session, bool cert_install_service,
+message_20::AuthorizationSetupRequest
+handle_response(const message_20::AuthorizationSetupResponse& res, d20::Session& session, bool cert_install_service,
                const std::vector<message_20::Authorization>& authorization_services) {
 
-    auto res = message_20::AuthorizationSetupResponse(); // default mandatory values [V2G20-736]
+    //RDB TODO do the correct thing with the information sent back in the response
+    
+    
 
-    if (validate_and_setup_header(res.header, session, req.header.session_id) == false) {
-        return response_with_code(res, message_20::ResponseCode::FAILED_UnknownSession);
-    }
 
-    res.certificate_installation_service = cert_install_service;
+    auto req = message_20::AuthorizationSetupRequest(); // default mandatory values [V2G20-736]
 
-    if (authorization_services.empty()) {
-        logf("Warning: authorization_services was not set. Setting EIM as auth_mode\n");
-        res.authorization_services = {message_20::Authorization::EIM};
-    } else {
-        res.authorization_services = authorization_services;
-    }
-
-    session.offered_services.auth_services = res.authorization_services;
-
-    if (res.authorization_services.size() == 1 && res.authorization_services[0] == message_20::Authorization::EIM) {
-        res.authorization_mode.emplace<message_20::AuthorizationSetupResponse::EIM_ASResAuthorizationMode>();
-    } else {
-        auto& pnc_auth_mode =
-            res.authorization_mode.emplace<message_20::AuthorizationSetupResponse::PnC_ASResAuthorizationMode>();
-
-        std::random_device rd;
-        std::mt19937 generator(rd());
-        std::uniform_int_distribution<uint8_t> distribution(0x00, 0xff);
-
-        for (auto& item : pnc_auth_mode.gen_challenge) {
-            item = distribution(generator);
-        }
-    }
-
-    return response_with_code(res, message_20::ResponseCode::OK);
+    return request_with_code(req, message_20::ResponseCode::OK);
 }
 
 void AuthorizationSetup::enter() {
     ctx.log.enter_state("AuthorizationSetup");
+
+    message_20::AuthorizationSetupRequest req;
+    setup_header(req.header,ctx.session);
+
+    ctx.request(req);
 }
 
 FsmSimpleState::HandleEventReturnType AuthorizationSetup::handle_event(AllocatorType& sa, FsmEvent ev) {
@@ -62,38 +42,40 @@ FsmSimpleState::HandleEventReturnType AuthorizationSetup::handle_event(Allocator
         return sa.PASS_ON;
     }
 
-    const auto variant = ctx.get_request();
+    const auto variant = ctx.get_response();
 
-    if (const auto req = variant->get_if<message_20::AuthorizationSetupRequest>()) {
-        const auto res =
-            handle_request(*req, ctx.session, ctx.config.cert_install_service, ctx.config.authorization_services);
+    if (const auto res = variant->get_if<message_20::AuthorizationSetupResponse>()) {
+        const auto req =
+            handle_response(*res, ctx.session, ctx.config.cert_install_service, ctx.config.authorization_services);
 
-        logf("Timestamp: %d\n", req->header.timestamp);
+        logf("Timestamp: %d\n", res->header.timestamp);
 
-        ctx.respond(res);
+        //ctx.respond(req);
 
-        if (res.response_code >= message_20::ResponseCode::FAILED) {
-            ctx.session_stopped = true;
-            return sa.PASS_ON;
-        }
+        //if (req.request_code >= message_20::RequestCode::FAILED) {
+        //    ctx.session_stopped = true;
+        //    return sa.PASS_ON;
+       // }
 
         // Todo(sl): PnC is currently not supported
-        ctx.feedback.signal(session::feedback::Signal::REQUIRE_AUTH_EIM);
+        //ctx.feedback.signal(session::feedback::Signal::REQUIRE_AUTH_EIM);
 
         return sa.create_simple<Authorization>(ctx);
-    } else if (const auto req = variant->get_if<message_20::SessionStopRequest>()) {
-        const auto res = handle_request(*req, ctx.session);
 
-        ctx.respond(res);
+    } else if (const auto res = variant->get_if<message_20::SessionStopResponse>()) {
+        //RBL handle stop correctly.
+        //const auto req = handle_response(*res, ctx.session);
+
+        //ctx.respond(req);
         ctx.session_stopped = true;
 
         return sa.PASS_ON;
     } else {
-        ctx.log("expected AuthorizationSetupReq! But code type id: %d", variant->get_type());
+        ctx.log("expected AuthorizationSetupRes! But code type id: %d", variant->get_type());
 
         // Sequence Error
-        const message_20::Type req_type = variant->get_type();
-        send_sequence_error(req_type, ctx);
+        const message_20::Type res_type = variant->get_type();
+        send_sequence_error(res_type, ctx);
 
         ctx.session_stopped = true;
         return sa.PASS_ON;

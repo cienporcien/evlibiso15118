@@ -9,10 +9,10 @@
 namespace eviso15118::d20 {
 
 // FIXME (aw): not sure about correct signature here for RVO
-template <typename Response, typename ResponseCode> Response& response_with_code(Response& res, ResponseCode code) {
+template <typename Request, typename RequestCode> Request& request_with_code(Request& req, RequestCode code) {
     // FIXME (aw): could add an static_assert here that ResponseCode is an enum?
-    res.response_code = code;
-    return res;
+    //req.request_code = code;
+    return req;
 }
 
 bool validate_and_setup_header(message_20::Header&, const Session&, const decltype(message_20::Header::session_id)&);

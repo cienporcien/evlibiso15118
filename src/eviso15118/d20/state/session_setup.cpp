@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2023 Pionix GmbH and Contributors to EVerest
+// Copyright 2023 Pionix GmbH and Contributors to EVereqt
 #include <algorithm>
 
 #include <eviso15118/d20/state/authorization_setup.hpp>
@@ -15,23 +15,36 @@ static bool session_is_zero(const eviso15118::message_20::Header& header) {
 
 namespace eviso15118::d20::state {
 
-message_20::SessionSetupResponse handle_request(const message_20::SessionSetupRequest& req, const d20::Session& session,
+message_20::SessionSetupRequest handle_response(const message_20::SessionSetupResponse& res, const d20::Session& session,
                                                 const std::string evse_id, bool new_session) {
 
-    message_20::SessionSetupResponse res;
-    setup_header(res.header, session);
+    message_20::SessionSetupRequest req;
+    setup_header(req.header, session);
 
-    res.evseid = evse_id;
+    //req.evseid = evse_id;
 
     if (new_session) {
-        return response_with_code(res, message_20::ResponseCode::OK_NewSessionEstablished);
+        return request_with_code(req, message_20::ResponseCode::OK_NewSessionEstablished);
     } else {
-        return response_with_code(res, message_20::ResponseCode::OK_OldSessionJoined);
+        return request_with_code(req, message_20::ResponseCode::OK_OldSessionJoined);
     }
 }
 
-void SessionSetup::enter() {
+void SessionSetup::enter()
+{
     ctx.log.enter_state("SessionSetup");
+
+    // Here, send the SessionSetupReq
+    // RDB TODO make sure a timer is started.
+    message_20::SessionSetupRequest req;
+
+    // RDB TODO This needs to come from the config or the EV ECU
+    req.evccid = "WMIV1234567890ABCDEX";
+    req.header.session_id.fill(0);
+    req.header.timestamp = static_cast<uint64_t>(std::time(nullptr));
+
+    // Send it.
+    ctx.request(req);
 }
 
 FsmSimpleState::HandleEventReturnType SessionSetup::handle_event(AllocatorType& sa, FsmEvent ev) {
@@ -40,38 +53,38 @@ FsmSimpleState::HandleEventReturnType SessionSetup::handle_event(AllocatorType& 
         return sa.PASS_ON;
     }
 
-    const auto variant = ctx.get_request();
+    const auto variant = ctx.get_response();
 
-    if (const auto req = variant->get_if<message_20::SessionSetupRequest>()) {
+    if (const auto res = variant->get_if<message_20::SessionSetupResponse>()) {
 
-        logf("Received session setup with evccid: %s\n", req->evccid.c_str());
+        logf("Received session setup response with evseid: %s \n", res->evseid.c_str());
 
         bool new_session{true};
 
-        if (session_is_zero(req->header)) {
+        if (session_is_zero(res->header)) {
             ctx.session = Session();
-        } else if (req->header.session_id == ctx.session.get_id()) {
+        } else if (res->header.session_id == ctx.session.get_id()) {
             new_session = false;
         } else {
-            ctx.session = Session();
+            ctx.session = Session(res->header.session_id);
         }
 
         evse_id = ctx.config.evse_id;
 
-        const auto res = handle_request(*req, ctx.session, evse_id, new_session);
+        //RDB TODO - This needs to be updated, or maybe removed.
+        const auto req = handle_response(*res, ctx.session, evse_id, new_session);
 
-        ctx.respond(res);
+        //ctx.respond(req);
 
         return sa.create_simple<AuthorizationSetup>(ctx);
 
-        // Todo(sl): Going straight to ChargeParameterDiscovery?
 
     } else {
-        ctx.log("expected SessionSetupReq! But code type id: %d", variant->get_type());
+        ctx.log("expected SessionSetupRes! But code type id: %d", variant->get_type());
 
         // Sequence Error
-        const message_20::Type req_type = variant->get_type();
-        send_sequence_error(req_type, ctx);
+        const message_20::Type res_type = variant->get_type();
+        send_sequence_error(res_type, ctx);
 
         ctx.session_stopped = true;
         return sa.PASS_ON;

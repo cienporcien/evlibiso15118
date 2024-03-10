@@ -50,36 +50,36 @@ target_sources(eviso15118
         d20/state/supported_app_protocol.cpp
         d20/state/session_setup.cpp
         d20/state/authorization_setup.cpp
-        d20/state/authorization.cpp
-        d20/state/service_discovery.cpp
-        d20/state/service_detail.cpp
-        d20/state/service_selection.cpp
-        d20/state/dc_charge_parameter_discovery.cpp
-        d20/state/schedule_exchange.cpp
-        d20/state/dc_cable_check.cpp
-        d20/state/dc_pre_charge.cpp
-        d20/state/power_delivery.cpp
-        d20/state/dc_charge_loop.cpp
-        d20/state/dc_welding_detection.cpp
-        d20/state/session_stop.cpp
+#         d20/state/authorization.cpp
+#         d20/state/service_discovery.cpp
+#         d20/state/service_detail.cpp
+#         d20/state/service_selection.cpp
+#         d20/state/dc_charge_parameter_discovery.cpp
+#         d20/state/schedule_exchange.cpp
+#         d20/state/dc_cable_check.cpp
+#         d20/state/dc_pre_charge.cpp
+#         d20/state/power_delivery.cpp
+#         d20/state/dc_charge_loop.cpp
+#         d20/state/dc_welding_detection.cpp
+#         d20/state/session_stop.cpp
 
         message/variant.cpp
         message/supported_app_protocol.cpp
         message/session_setup.cpp
         message/common.cpp
         message/authorization_setup.cpp
-        message/authorization.cpp
-        message/service_discovery.cpp
-        message/service_detail.cpp
-        message/service_selection.cpp
-        message/dc_charge_parameter_discovery.cpp
-        message/schedule_exchange.cpp
-        message/dc_cable_check.cpp
-        message/dc_pre_charge.cpp
-        message/power_delivery.cpp
-        message/dc_charge_loop.cpp
-        message/dc_welding_detection.cpp
-        message/session_stop.cpp
+#         message/authorization.cpp
+#         message/service_discovery.cpp
+#         message/service_detail.cpp
+#         message/service_selection.cpp
+#         message/dc_charge_parameter_discovery.cpp
+#         message/schedule_exchange.cpp
+#         message/dc_cable_check.cpp
+#         message/dc_pre_charge.cpp
+#         message/power_delivery.cpp
+#         message/dc_charge_loop.cpp
+#         message/dc_welding_detection.cpp
+#         message/session_stop.cpp
 
         d2/fsm.cpp
         d2/context.cpp

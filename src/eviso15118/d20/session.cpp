@@ -16,6 +16,15 @@ Session::Session() {
     }
 }
 
+    //RDB EV side gets the ID from the EVSE after SessionSetupRes.
+    //Allow to set the ID, or make a new constructor.
+Session::Session(std::array<uint8_t, ID_LENGTH> ID) {
+
+    for (int i = 0; i<ID_LENGTH;i++) {
+        id[i] = ID[i];
+    }
+}
+
 Session::Session(SelectedServiceParameters service_parameters_) : selected_services(service_parameters_) {
     std::random_device rd;
     std::mt19937 generator(rd());

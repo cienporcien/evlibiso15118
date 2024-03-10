@@ -11,20 +11,27 @@
 
 namespace eviso15118::message_20 {
 
-template <> void convert(const struct appHand_supportedAppProtocolReq& in, SupportedAppProtocolRequest& out) {
-    const auto& ap_in = in.AppProtocol;
-    out.app_protocol.reserve(ap_in.arrayLen);
+template <> void convert(const struct appHand_supportedAppProtocolRes& in, SupportedAppProtocolResponse& out) {
+    //RDB in the response, we just get the SchemaID
 
-    for (size_t i = 0; i < ap_in.arrayLen; ++i) {
-        const auto& item_in = ap_in.array[i];
-        auto& item_out = out.app_protocol.emplace_back();
-
-        item_out.protocol_namespace = CB2CPP_STRING(item_in.ProtocolNamespace);
-        item_out.version_number_major = item_in.VersionNumberMajor;
-        item_out.version_number_minor = item_in.VersionNumberMinor;
-        item_out.schema_id = item_in.SchemaID;
-        item_out.priority = item_in.Priority;
+    if(in.SchemaID_isUsed==true){
+        out.schema_id=in.SchemaID;
     }
+    cb_convert_enum(in.ResponseCode, out.response_code);
+    
+    // const auto& ap_in = in.AppProtocol;
+    // out.app_protocol.reserve(ap_in.arrayLen);
+
+    // for (size_t i = 0; i < ap_in.arrayLen; ++i) {
+    //     const auto& item_in = ap_in.array[i];
+    //     auto& item_out = out.app_protocol.emplace_back();
+
+    //     item_out.protocol_namespace = CB2CPP_STRING(item_in.ProtocolNamespace);
+    //     item_out.version_number_major = item_in.VersionNumberMajor;
+    //     item_out.version_number_minor = item_in.VersionNumberMinor;
+    //     item_out.schema_id = item_in.SchemaID;
+    //     item_out.priority = item_in.Priority;
+    // }
 }
 
 template <> void convert(const SupportedAppProtocolRequest& in, struct appHand_supportedAppProtocolReq& out) {
@@ -57,20 +64,9 @@ template <> void convert(const SupportedAppProtocolResponse& in, struct appHand_
     }
 }
 
-template <> void insert_type(VariantAccess& va, const struct appHand_supportedAppProtocolReq& in) {
-    va.insert_type<SupportedAppProtocolRequest>(in);
+template <> void insert_type(VariantAccess& va, const struct appHand_supportedAppProtocolRes& in) {
+    va.insert_type<SupportedAppProtocolResponse>(in);
 };
-
-template <> int serialize_to_exi(const SupportedAppProtocolResponse& in, exi_bitstream_t& out) {
-    appHand_exiDocument doc;
-    init_appHand_exiDocument(&doc);
-
-    convert(in, doc.supportedAppProtocolRes);
-
-    CB_SET_USED(doc.supportedAppProtocolRes);
-
-    return encode_appHand_exiDocument(&out, &doc);
-}
 
 template <> int serialize_to_exi(const SupportedAppProtocolRequest& in, exi_bitstream_t& out) {
     appHand_exiDocument doc;
@@ -83,11 +79,22 @@ template <> int serialize_to_exi(const SupportedAppProtocolRequest& in, exi_bits
     return encode_appHand_exiDocument(&out, &doc);
 }
 
-template <> size_t serialize(const SupportedAppProtocolResponse& in, const io::StreamOutputView& out) {
-    return serialize_helper(in, out);
+template <> int serialize_to_exi(const SupportedAppProtocolResponse& in, exi_bitstream_t& out) {
+    appHand_exiDocument doc;
+    init_appHand_exiDocument(&doc);
+
+    convert(in, doc.supportedAppProtocolRes);
+
+    CB_SET_USED(doc.supportedAppProtocolRes);
+
+    return encode_appHand_exiDocument(&out, &doc);
 }
 
 template <> size_t serialize(const SupportedAppProtocolRequest& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
+template <> size_t serialize(const SupportedAppProtocolResponse& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
 

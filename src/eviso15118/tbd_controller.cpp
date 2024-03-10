@@ -121,6 +121,7 @@ void TbdController::handle_sdp_server_input() {
     // Todo(sl): Check if session_config is empty
     const auto& new_session = sessions.emplace_back(std::move(connection), session_config, callbacks);
 
+
     //RDB don't reply, instead go to the first state (SupportedAppRequest) by sending a control event
     this->send_control_event(d20::StartStopCharging(d20::start_stop_charging::START_CHARGING));
 }

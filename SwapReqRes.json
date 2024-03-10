@@ -1,0 +1,74 @@
+[
+  {
+    "matcher": "Response",
+    "error": "",
+    "resolver": "RP1",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "response",
+    "error": "",
+    "resolver": "RP2",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "Res",
+    "error": "",
+    "resolver": "RP3",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "res",
+    "error": "",
+    "resolver": "RP4",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "Request",
+    "error": "",
+    "resolver": "Response",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "request",
+    "error": "",
+    "resolver": "response",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "Req",
+    "error": "",
+    "resolver": "Res",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "req",
+    "error": "",
+    "resolver": "res",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "RP1",
+    "error": "",
+    "resolver": "Request",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "RP2",
+    "error": "",
+    "resolver": "request",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "RP3",
+    "error": "",
+    "resolver": "Req",
+    "isCaseSensitive": true
+  },
+  {
+    "matcher": "RP4",
+    "error": "",
+    "isCaseSensitive": true,
+    "resolver": "req"
+  }
+]

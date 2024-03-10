@@ -97,14 +97,14 @@ bool read_single_sdp_packet(io::IConnection& connection, io::SdpPacket& sdp_pack
     return false;
 }
 
-static size_t setup_response_header(uint8_t* buffer, eviso15118::io::v2gtp::PayloadType payload_type, size_t size) {
+static size_t setup_request_header(uint8_t* buffer, eviso15118::io::v2gtp::PayloadType payload_type, size_t size) {
     buffer[0] = eviso15118::io::SDP_PROTOCOL_VERSION;
     buffer[1] = eviso15118::io::SDP_INVERSE_PROTOCOL_VERSION;
 
-    const uint16_t response_payload_type =
+    const uint16_t request_payload_type =
         htobe16(static_cast<std::underlying_type_t<eviso15118::io::v2gtp::PayloadType>>(payload_type));
 
-    std::memcpy(buffer + 2, &response_payload_type, sizeof(response_payload_type));
+    std::memcpy(buffer + 2, &request_payload_type, sizeof(request_payload_type));
 
     const uint32_t tmp32 = htobe32(size);
 
@@ -121,8 +121,11 @@ Session::Session(std::unique_ptr<io::IConnection> connection_, const d20::Sessio
 
     next_session_event = offset_time_point_by_ms(get_current_time_point(), SESSION_IDLE_TIMEOUT_MS);
     connection->set_event_callback([this](io::ConnectionEvent event) { this->handle_connection_event(event); });
+    
     //RDB start the state machine in SAP
     fsm.reset<d20::state::SupportedAppProtocol>(ctx);
+    //Also, since we are on the EV side, we are now connected if we get this far.
+    state.connected=true;
 }
 
 Session::~Session() = default;
@@ -134,11 +137,11 @@ void Session::push_control_event(const d20::ControlEvent& event) {
 TimePoint const& Session::poll() {
     const auto now = get_current_time_point();
 
-    if (not state.connected) {
-        // nothing happened so far, just return
-        next_session_event = offset_time_point_by_ms(now, SESSION_IDLE_TIMEOUT_MS);
-        return next_session_event;
-    }
+    // if (not state.connected) {
+    //     // nothing happened so far, just return
+    //     next_session_event = offset_time_point_by_ms(now, SESSION_IDLE_TIMEOUT_MS);
+    //     return next_session_event;
+    // }
 
     // check for new data to read
     if (state.new_data) {
@@ -160,21 +163,21 @@ TimePoint const& Session::poll() {
         // FIXME (aw): this event loop only acts on new packets, seems to be enough for now ...
         log_packet_from_car(packet, log);
 
-        message_exchange.set_request(make_variant_from_packet(packet));
+        message_exchange.set_response(make_variant_from_packet(packet));
 
         packet = {}; // reset the packet
 
         const auto res = fsm.handle_event(d20::FsmEvent::V2GTP_MESSAGE);
     }
 
-    const auto [got_response, payload_size, payload_type] = message_exchange.check_and_clear_response();
+    const auto [got_request, payload_size, payload_type] = message_exchange.check_and_clear_request();
 
-    if (got_response) {
-        const auto response_size = setup_response_header(response_buffer, payload_type, payload_size);
-        connection->write(response_buffer, response_size);
+    if (got_request) {
+        const auto request_size = setup_request_header(request_buffer, payload_type, payload_size);
+        connection->write(request_buffer, request_size);
 
         // FIXME (aw): this is hacky ...
-        log.exi(static_cast<uint16_t>(payload_type), response_buffer + io::SdpPacket::V2GTP_HEADER_SIZE, payload_size,
+        log.exi(static_cast<uint16_t>(payload_type), request_buffer + io::SdpPacket::V2GTP_HEADER_SIZE, payload_size,
                 session::logging::ExiMessageDirection::TO_EV);
 
         if (session_stopped) {

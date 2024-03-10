@@ -77,6 +77,24 @@ CREATE_TYPE_TRAIT(DC_ChargeLoopRequest, DC_ChargeLoopReq);
 CREATE_TYPE_TRAIT(DC_WeldingDetectionRequest, DC_WeldingDetectionReq);
 CREATE_TYPE_TRAIT(SessionStopRequest, SessionStopReq);
 
+
+//RBL Add the type traits for the incoming Responses from the EVSE
+CREATE_TYPE_TRAIT(SupportedAppProtocolResponse, SupportedAppProtocolRes);
+CREATE_TYPE_TRAIT(SessionSetupResponse, SessionSetupRes);
+CREATE_TYPE_TRAIT(AuthorizationSetupResponse, AuthorizationSetupRes);
+CREATE_TYPE_TRAIT(AuthorizationResponse, AuthorizationRes);
+CREATE_TYPE_TRAIT(ServiceDiscoveryResponse, ServiceDiscoveryRes);
+CREATE_TYPE_TRAIT(ServiceDetailResponse, ServiceDetailRes);
+CREATE_TYPE_TRAIT(ServiceSelectionResponse, ServiceSelectionRes);
+CREATE_TYPE_TRAIT(DC_ChargeParameterDiscoveryResponse, DC_ChargeParameterDiscoveryRes);
+CREATE_TYPE_TRAIT(ScheduleExchangeResponse, ScheduleExchangeRes);
+CREATE_TYPE_TRAIT(DC_CableCheckResponse, DC_CableCheckRes);
+CREATE_TYPE_TRAIT(DC_PreChargeResponse, DC_PreChargeRes);
+CREATE_TYPE_TRAIT(PowerDeliveryResponse, PowerDeliveryRes);
+CREATE_TYPE_TRAIT(DC_ChargeLoopResponse, DC_ChargeLoopRes);
+CREATE_TYPE_TRAIT(DC_WeldingDetectionResponse, DC_WeldingDetectionRes);
+CREATE_TYPE_TRAIT(SessionStopResponse, SessionStopRes);
+
 #ifdef CREATE_TYPE_TRAIT_PUSHED
 #define CREATE_TYPE_TRAIT CREATE_TYPE_TRAIT_PUSHED
 #else

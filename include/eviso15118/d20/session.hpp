@@ -80,12 +80,16 @@ class Session {
 
 public:
     Session();
+    //RDB EV side gets the ID from the EVSE after SessionSetupRes.
+    //Allow to set the ID, or make a new constructor.
+    Session(std::array<uint8_t, ID_LENGTH> ID);
     Session(SelectedServiceParameters);
     Session(OfferedServices);
 
     std::array<uint8_t, ID_LENGTH> get_id() const {
         return id;
     }
+
 
     bool find_parameter_set_id(const message_20::ServiceCategory service, int16_t id);
 

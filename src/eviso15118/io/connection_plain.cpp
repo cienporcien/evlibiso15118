@@ -43,7 +43,12 @@ ConnectionPlain::ConnectionPlain(PollManager& poll_manager_, const std::string& 
     }
 
     //Not sure what to do here, 
-    poll_manager.register_fd(fd, [this]() { this->handle_connect(); });
+    poll_manager.register_fd(fd, [this]() { this->handle_data(); });
+
+    //Connection is made
+    connection_open=true;
+    
+
 }
 
 ConnectionPlain::~ConnectionPlain() = default;

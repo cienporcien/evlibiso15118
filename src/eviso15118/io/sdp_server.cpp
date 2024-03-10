@@ -22,33 +22,22 @@ static void log_peer_hostname(const struct sockaddr_in6& address) {
                                                 hostname, hostname_len, nullptr, 0, NI_NUMERICHOST);
 
     if (0 == get_if_name_result) {
-        logf("Got SDP request from %s\n", hostname);
+        logf("Got SDP response from %s\n", hostname);
     } else {
-        logf("Got SDP request, but failed to get the address\n");
+        logf("Got SDP response, but failed to get the address\n");
     }
 }
 
 namespace io {
 
 SdpServer::SdpServer() {
+    //RDB for the EV side, we don't bind. Just set up the socket.
     fd = socket(AF_INET6, SOCK_DGRAM, 0);
 
     if (fd == -1) {
         log_and_throw("Failed to open socket");
     }
 
-    // initialize socket address, leave scope_id and flowinfo at 0
-    struct sockaddr_in6 socket_address;
-    bzero(&socket_address, sizeof(socket_address));
-    socket_address.sin6_family = AF_INET6;
-    socket_address.sin6_port = htobe16(v2gtp::SDP_SERVER_PORT);
-    memcpy(&socket_address.sin6_addr, &in6addr_any, sizeof(socket_address.sin6_addr));
-
-    const auto bind_result =
-        bind(fd, reinterpret_cast<const struct sockaddr*>(&socket_address), sizeof(socket_address));
-    if (bind_result == -1) {
-    //    log_and_throw("Failed to bind to socket");
-    }
 }
 
 SdpServer::~SdpServer() {
@@ -116,7 +105,7 @@ PeerRequestContext SdpServer::get_peer_response() {
         log_and_throw("Unexpected address length during read on sdp server socket");
     }
 
-    log_peer_hostname(peer_address);
+//    log_peer_hostname(peer_address);
 
     if (read_result == sizeof(udp_buffer)) {
         logf("Read on sdp server socket succeeded, but message is to big for the buffer");
@@ -129,7 +118,7 @@ PeerRequestContext SdpServer::get_peer_response() {
 
     if (parse_sdp_result != V2GTP_ERROR__NO_ERROR) {
         // FIXME (aw): we should not die here immediately
-        logf("Sdp server received an unexpected payload");
+        logf("Sdp server received an unexpected payload 2");
         return PeerRequestContext{false};
     }
 
@@ -187,8 +176,10 @@ void SdpServer::send_request() {
     // The address is:
     //[V2G2-139]An SDP client shall send SECC Discovery Request message to the destination local-link
     //multicast address (FF02::1) as defined in IETF RFC 4291.
+    bzero(&request.address, sizeof(request.address));
     request.address={AF_INET6, htons(15118)};
     inet_pton(AF_INET6, "ff02::1", &request.address.sin6_addr);
+
     request.security=v2gtp::Security::NO_TRANSPORT_SECURITY;
     request.transport_protocol=v2gtp::TransportProtocol::TCP;
 
@@ -204,10 +195,8 @@ void SdpServer::send_request() {
 
     V2GTP20_WriteHeader(v2g_packet, 2, V2GTP20_SDP_REQUEST_PAYLOAD_ID);
 
-    const auto peer_addr_len = sizeof(request.address);
-
     sendto(fd, v2g_packet, sizeof(v2g_packet), 0, reinterpret_cast<const sockaddr*>(&request.address),
-           peer_addr_len);
+           sizeof(request.address));
 }
 
 
