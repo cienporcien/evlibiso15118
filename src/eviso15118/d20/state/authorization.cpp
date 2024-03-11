@@ -20,76 +20,43 @@ static bool find_auth_service_in_offered_services(const message_20::Authorizatio
            offered_auth_services.end();
 }
 
-message_20::AuthorizationRequest handle_response(const message_20::AuthorizationResponse& res,
-                                                 const d20::Session& session,
-                                                 const message_20::AuthStatus& authorization_status) {
 
-    message_20::AuthorizationRequest req = message_20::AuthorizationRequest();
-
-    if (validate_and_setup_header(req.header, session, res.header.session_id) == false) {
-        return request_with_code(req, message_20::RequestCode::FAILED_UnknownSession);
-    }
-
-    // [V2G20-2209] Check if authorization service was offered in authorization_setup req
-    if (not find_auth_service_in_offered_services(res.selected_authorization_service, session)) {
-        return request_with_code(
-            req, message_20::RequestCode::WARNING_AuthorizationSelectionInvalid); // [V2G20-2226] Handling if warning
-    }
-
-    message_20::RequestCode request_code;
-
-    switch (res.selected_authorization_service) {
-    case message_20::Authorization::EIM:
-        switch (authorization_status) {
-        case AuthStatus::Accepted:
-            req.evse_processing = message_20::Processing::Finished;
-            request_code = message_20::RequestCode::OK;
-            break;
-        case AuthStatus::Rejected: // Failure [V2G20-2230]
-            req.evse_processing = message_20::Processing::Finished;
-            request_code = message_20::RequestCode::WARNING_EIMAuthorizationFailure;
-            break;
-        case AuthStatus::Pending:
-        default:
-            req.evse_processing = message_20::Processing::Ongoing;
-            request_code = message_20::RequestCode::OK;
-            break;
-        }
-        break;
-
-    case message_20::Authorization::PnC:
-        // todo(SL): Handle PnC
-        break;
-
-    default:
-        // todo(SL): Fill
-        break;
-    }
-
+//RDB - setup the request message to avoid duplication
+message_20::AuthorizationRequest Authorization::setup_request(const d20::Session &session)
+{
+    message_20::AuthorizationRequest req;
+    setup_header(req.header,session);
+    req.selected_authorization_service=message_20::Authorization::EIM;
+    message_20::RequestCode request_code  = message_20::RequestCode::OK;
     return request_with_code(req, request_code);
+
 }
 
 void Authorization::enter() {
     ctx.log.enter_state("Authorization");
+
+    //Prepare and send the request
+    const auto req = Authorization::setup_request(ctx.session);
+    ctx.request(req);
 }
 
 FsmSimpleState::HandleEventReturnType Authorization::handle_event(AllocatorType& sa, FsmEvent ev) {
 
-    if (ev == FsmEvent::CONTROL_MESSAGE) {
-        const auto control_data = ctx.get_control_event<AuthorizationRequest>();
-        if (not control_data) {
-            // FIXME (aw): error handling
-            return sa.HANDLED_INTERNALLY;
-        }
+    // if (ev == FsmEvent::CONTROL_MESSAGE) {
+    //     const auto control_data = ctx.get_control_event<AuthorizationRequest>();
+    //     if (not control_data) {
+    //         // FIXME (aw): error handling
+    //         return sa.HANDLED_INTERNALLY;
+    //     }
 
-        if (*control_data) {
-            authorization_status = AuthStatus::Accepted;
-        } else {
-            authorization_status = AuthStatus::Rejected;
-        }
+    //     if (*control_data) {
+    //         authorization_status = AuthStatus::Accepted;
+    //     } else {
+    //         authorization_status = AuthStatus::Rejected;
+    //     }
     
-        return sa.HANDLED_INTERNALLY;
-    }
+    //     return sa.HANDLED_INTERNALLY;
+    // }
 
     if (ev != FsmEvent::V2GTP_MESSAGE) {
         return sa.PASS_ON;
@@ -98,24 +65,31 @@ FsmSimpleState::HandleEventReturnType Authorization::handle_event(AllocatorType&
     const auto variant = ctx.get_response();
 
     if (const auto res = variant->get_if<message_20::AuthorizationResponse>()) {
-        const auto req = handle_response(*res, ctx.session, authorization_status);
+        // const auto req = handle_response(*res, ctx.session, authorization_status);
 
-        ctx.reqpond(req);
+        // ctx.respond(req);
 
-        if (req.request_code >= message_20::RequestCode::FAILED) {
-            ctx.session_stopped = true;
-            return sa.PASS_ON;
-        }
+        // if (req.request_code >= message_20::RequestCode::FAILED) {
+        //     ctx.session_stopped = true;
+        //     return sa.PASS_ON;
+        // }
 
-        if (authorization_status == AuthStatus::Accepted) {
+        // RDB if the EIM is finished, go on, otherwise send another AuthorizationReq
+        if (res->evse_processing == message_20::Processing::Finished)
+        {
             authorization_status = AuthStatus::Pending; // reqet
             return sa.create_simple<ServiceDiscovery>(ctx);
-        } else {
+        }
+        else
+        {
+            // Prepare and send the request
+            const auto req = Authorization::setup_request(ctx.session);
+            ctx.request(req);
             return sa.HANDLED_INTERNALLY;
         }
     } else if (const auto res = variant->get_if<message_20::SessionStopResponse>()) {
-        const auto req = handle_response(*res, ctx.session);
-        ctx.reqpond(req);
+        // const auto req = handle_response(*res, ctx.session);
+        // ctx.respond(req);
 
         ctx.session_stopped = true;
         return sa.PASS_ON;

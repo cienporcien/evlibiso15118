@@ -116,6 +116,30 @@ template <> void convert(const struct iso20_ServiceDetailReqType& in, ServiceDet
     out.service = static_cast<ServiceCategory>(in.ServiceID);
 }
 
+//RBL Add the conversion for the response from the EVCC
+template <> void convert(const struct iso20_ServiceDetailResType& in, ServiceDetailResponse& out) {
+
+    cb_convert_enum(in.ResponseCode, out.response_code);
+
+    //RDB TODO Handle the various options in the response
+    cb_convert_enum(in.ServiceID, out.service);
+    
+    convert(in.Header, out.header);
+   
+}
+
+//RDB Add conversion for the request to convert to exi
+template <> void convert(const ServiceDetailRequest& in, iso20_ServiceDetailReqType& out) {
+    init_iso20_ServiceDetailReqType(&out);
+
+    //RDB TODO Handle the various options in the request
+    cb_convert_enum(in.service,out.ServiceID);
+
+    convert(in.header, out.Header);
+
+}
+
+
 struct ParamterValueVisitor {
     ParamterValueVisitor(iso20_ParameterType& parameter_) : parameter(parameter_){};
     void operator()(const bool& in) {
@@ -178,6 +202,11 @@ template <> void insert_type(VariantAccess& va, const struct iso20_ServiceDetail
     va.insert_type<ServiceDetailRequest>(in);
 }
 
+//RBL handle the response
+template <> void insert_type(VariantAccess& va, const struct iso20_ServiceDetailResType& in) {
+    va.insert_type<ServiceDetailResponse>(in);
+};
+
 template <> int serialize_to_exi(const ServiceDetailResponse& in, exi_bitstream_t& out) {
     iso20_exiDocument doc;
     init_iso20_exiDocument(&doc);
@@ -189,8 +218,27 @@ template <> int serialize_to_exi(const ServiceDetailResponse& in, exi_bitstream_
     return encode_iso20_exiDocument(&out, &doc);
 }
 
+//RDB output the request
+template <> int serialize_to_exi(const ServiceDetailRequest& in, exi_bitstream_t& out) {
+    iso20_exiDocument doc;
+    init_iso20_exiDocument(&doc);
+
+    CB_SET_USED(doc.ServiceDetailReq);
+
+    convert(in, doc.ServiceDetailReq);
+
+    return encode_iso20_exiDocument(&out, &doc);
+}
+
+
 template <> size_t serialize(const ServiceDetailResponse& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
+
+//RDB output the request
+template <> size_t serialize(const ServiceDetailRequest& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
 
 } // namespace eviso15118::message_20

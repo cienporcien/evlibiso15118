@@ -30,6 +30,32 @@ template <> void convert(const struct iso20_ServiceSelectionReqType& in, Service
     }
 }
 
+//RBL Add the conversion for the response from the EVCC
+template <> void convert(const struct iso20_ServiceSelectionResType& in, ServiceSelectionResponse& out) {
+
+    cb_convert_enum(in.ResponseCode, out.response_code);
+    
+    convert(in.Header, out.header);
+   
+}
+
+//RDB Add conversion for the request to convert to exi
+template <> void convert(const ServiceSelectionRequest& in, iso20_ServiceSelectionReqType& out) {
+    init_iso20_ServiceSelectionReqType(&out);
+
+    //RDB TODO Handle the various options in the request
+    cb_convert_enum(in.selected_energy_transfer_service.service_id,out.SelectedEnergyTransferService.ServiceID);
+    out.SelectedEnergyTransferService.ParameterSetID=in.selected_energy_transfer_service.parameter_set_id;
+
+    //TODO allow VAS
+    out.SelectedVASList_isUsed=false;
+
+    convert(in.header, out.Header);
+
+}
+
+
+
 template <> void convert(const ServiceSelectionResponse& in, iso20_ServiceSelectionResType& out) {
     init_iso20_ServiceSelectionResType(&out);
 
@@ -42,6 +68,12 @@ template <> void insert_type(VariantAccess& va, const struct iso20_ServiceSelect
     va.insert_type<ServiceSelectionRequest>(in);
 }
 
+//RBL handle the response
+template <> void insert_type(VariantAccess& va, const struct iso20_ServiceSelectionResType& in) {
+    va.insert_type<ServiceSelectionResponse>(in);
+};
+
+
 template <> int serialize_to_exi(const ServiceSelectionResponse& in, exi_bitstream_t& out) {
     iso20_exiDocument doc;
     init_iso20_exiDocument(&doc);
@@ -53,7 +85,24 @@ template <> int serialize_to_exi(const ServiceSelectionResponse& in, exi_bitstre
     return encode_iso20_exiDocument(&out, &doc);
 }
 
+//RDB output the request
+template <> int serialize_to_exi(const ServiceSelectionRequest& in, exi_bitstream_t& out) {
+    iso20_exiDocument doc;
+    init_iso20_exiDocument(&doc);
+
+    CB_SET_USED(doc.ServiceSelectionReq);
+
+    convert(in, doc.ServiceSelectionReq);
+
+    return encode_iso20_exiDocument(&out, &doc);
+}
+
 template <> size_t serialize(const ServiceSelectionResponse& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
+//RDB output the request
+template <> size_t serialize(const ServiceSelectionRequest& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
 

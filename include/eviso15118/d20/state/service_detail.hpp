@@ -12,6 +12,7 @@ struct ServiceDetail : public FsmSimpleState {
     void enter() final;
 
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
+    message_20::ServiceDetailRequest setup_request(const d20::Session &session);
 };
 
 } // namespace eviso15118::d20::state

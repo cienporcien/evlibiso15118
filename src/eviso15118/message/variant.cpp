@@ -47,14 +47,14 @@ static void handle_main(VariantAccess& va) {
         insert_type(va, doc.SessionSetupRes);
      } else if (doc.AuthorizationSetupRes_isUsed) {
         insert_type(va, doc.AuthorizationSetupRes);
-    // } else if (doc.AuthorizationRes_isUsed) {
-    //     insert_type(va, doc.AuthorizationRes);
-    // } else if (doc.ServiceDiscoveryRes_isUsed) {
-    //     insert_type(va, doc.ServiceDiscoveryRes);
-    // } else if (doc.ServiceDetailRes_isUsed) {
-    //     insert_type(va, doc.ServiceDetailRes);
-    // } else if (doc.ServiceSelectionRes_isUsed) {
-    //     insert_type(va, doc.ServiceSelectionRes);
+     } else if (doc.AuthorizationRes_isUsed) {
+        insert_type(va, doc.AuthorizationRes);
+     } else if (doc.ServiceDiscoveryRes_isUsed) {
+        insert_type(va, doc.ServiceDiscoveryRes);
+     } else if (doc.ServiceDetailRes_isUsed) {
+         insert_type(va, doc.ServiceDetailRes);
+     } else if (doc.ServiceSelectionRes_isUsed) {
+         insert_type(va, doc.ServiceSelectionRes);
     // } else if (doc.ScheduleExchangeRes_isUsed) {
     //     insert_type(va, doc.ScheduleExchangeRes);
     // } else if (doc.PowerDeliveryRes_isUsed) {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2023 Pionix GmbH and Contributors to EVerest
+// Copyright 2023 Pionix GmbH and Contributors to EVereqt
 #include <eviso15118/d20/state/dc_charge_parameter_discovery.hpp>
 #include <eviso15118/d20/state/service_selection.hpp>
 
@@ -11,70 +11,25 @@
 
 namespace eviso15118::d20::state {
 
-message_20::ServiceSelectionResponse handle_request(const message_20::ServiceSelectionRequest& req,
-                                                    d20::Session& session) {
+//RDB - setup the request message to avoid duplication
+message_20::ServiceSelectionRequest ServiceSelection::setup_request(const d20::Session &session)
+{
+    message_20::ServiceSelectionRequest req;
+    setup_header(req.header,session);
+    message_20::RequestCode request_code  = message_20::RequestCode::OK;
+    req.selected_energy_transfer_service.service_id =message_20::ServiceCategory::DC;
 
-    message_20::ServiceSelectionResponse res;
-
-    if (validate_and_setup_header(res.header, session, req.header.session_id) == false) {
-        return response_with_code(res, message_20::ResponseCode::FAILED_UnknownSession);
-    }
-
-    bool energy_service_found = false;
-    bool vas_services_found = false;
-
-    for (auto& energy_service : session.offered_services.energy_services) {
-        if (energy_service == req.selected_energy_transfer_service.service_id) {
-            energy_service_found = true;
-            break;
-        }
-    }
-
-    if (!energy_service_found) {
-        return response_with_code(res, message_20::ResponseCode::FAILED_NoEnergyTransferServiceSelected);
-    }
-
-    if (req.selected_vas_list.has_value()) {
-        auto& selected_vas_list = req.selected_vas_list.value();
-
-        for (auto& vas_service : selected_vas_list) {
-            if (std::find(session.offered_services.vas_services.begin(), session.offered_services.vas_services.end(),
-                          vas_service.service_id) == session.offered_services.vas_services.end()) {
-                vas_services_found = false;
-                break;
-            }
-            vas_services_found = true;
-        }
-
-        if (not vas_services_found) {
-            return response_with_code(res, message_20::ResponseCode::FAILED_ServiceSelectionInvalid);
-        }
-    }
-
-    if (not session.find_parameter_set_id(req.selected_energy_transfer_service.service_id,
-                                          req.selected_energy_transfer_service.parameter_set_id)) {
-        return response_with_code(res, message_20::ResponseCode::FAILED_ServiceSelectionInvalid);
-    }
-
-    session.selected_service_parameters(req.selected_energy_transfer_service.service_id,
-                                        req.selected_energy_transfer_service.parameter_set_id);
-
-    if (req.selected_vas_list.has_value()) {
-        auto& selected_vas_list = req.selected_vas_list.value();
-
-        for (auto& vas_service : selected_vas_list) {
-            if (not session.find_parameter_set_id(vas_service.service_id, vas_service.parameter_set_id)) {
-                return response_with_code(res, message_20::ResponseCode::FAILED_ServiceSelectionInvalid);
-            }
-            session.selected_service_parameters(vas_service.service_id, vas_service.parameter_set_id);
-        }
-    }
-
-    return response_with_code(res, message_20::ResponseCode::OK);
+    //RDB TODO fix this correctly
+    req.selected_energy_transfer_service.parameter_set_id=0;
+    return request_with_code(req, request_code);
 }
+
 
 void ServiceSelection::enter() {
     ctx.log.enter_state("ServiceSelection");
+       //Prepare and send the request
+    const auto req = ServiceSelection::setup_request(ctx.session);
+    ctx.request(req);
 }
 
 FsmSimpleState::HandleEventReturnType ServiceSelection::handle_event(AllocatorType& sa, FsmEvent ev) {
@@ -83,45 +38,43 @@ FsmSimpleState::HandleEventReturnType ServiceSelection::handle_event(AllocatorTy
         return sa.PASS_ON;
     }
 
-    const auto variant = ctx.get_request();
+    const auto variant = ctx.get_response();
 
-    if (const auto req = variant->get_if<message_20::ServiceDetailRequest>()) {
-        logf("Requested info about ServiceID: %d\n", req->service);
+    if (const auto res = variant->get_if<message_20::ServiceDetailResponse>()) {
+        logf("Response info about ServiceID: %d\n", res->service);
 
-        const auto res = handle_request(*req, ctx.session, ctx.config);
-
-        ctx.respond(res);
-
-        if (res.response_code >= message_20::ResponseCode::FAILED) {
+        if (res->response_code >= message_20::ResponseCode::FAILED) {
             ctx.session_stopped = true;
             return sa.PASS_ON;
         }
+        // Prepare and send the request
+        const auto req = ServiceSelection::setup_request(ctx.session);
+        ctx.request(req);
 
         return sa.HANDLED_INTERNALLY;
-    } else if (const auto req = variant->get_if<message_20::ServiceSelectionRequest>()) {
-        const auto res = handle_request(*req, ctx.session);
 
-        ctx.respond(res);
+    } else if (const auto res = variant->get_if<message_20::ServiceSelectionResponse>()) {
 
-        if (res.response_code >= message_20::ResponseCode::FAILED) {
+
+        if (res->response_code >= message_20::ResponseCode::FAILED) {
             ctx.session_stopped = true;
             return sa.PASS_ON;
         }
 
         return sa.create_simple<DC_ChargeParameterDiscovery>(ctx);
-    } else if (const auto req = variant->get_if<message_20::SessionStopRequest>()) {
-        const auto res = handle_request(*req, ctx.session);
+        
+        
+    } else if (const auto res = variant->get_if<message_20::SessionStopResponse>()) {
 
-        ctx.respond(res);
         ctx.session_stopped = true;
 
         return sa.PASS_ON;
     } else {
-        ctx.log("expected ServiceDetailReq! But code type id: %d", variant->get_type());
+        ctx.log("expected ServiceDetailRes! But code type id: %d", variant->get_type());
 
         // Sequence Error
-        const message_20::Type req_type = variant->get_type();
-        send_sequence_error(req_type, ctx);
+        const message_20::Type res_type = variant->get_type();
+        send_sequence_error(res_type, ctx);
 
         ctx.session_stopped = true;
         return sa.PASS_ON;

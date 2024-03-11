@@ -29,6 +29,32 @@ template <> void convert(const struct iso20_AuthorizationReqType& in, Authorizat
     }
 }
 
+//RBL Add the conversion for the response from the EVCC
+template <> void convert(const struct iso20_AuthorizationResType& in, AuthorizationResponse& out) {
+
+    cb_convert_enum(in.ResponseCode, out.response_code);
+
+    cb_convert_enum(in.EVSEProcessing, out.evse_processing);
+
+    convert(in.Header, out.header);
+   
+}
+
+
+//RDB Add conversion for the request to convert to exi
+template <> void convert(const AuthorizationRequest& in, iso20_AuthorizationReqType& out) {
+    init_iso20_AuthorizationReqType(&out);
+
+    convert(in.header, out.Header);
+
+    
+    cb_convert_enum(in.selected_authorization_service, out.SelectedAuthorizationService);
+
+    //RDB TODO add pnc
+    out.EIM_AReqAuthorizationMode_isUsed=true;
+
+}
+
 template <> void convert(const AuthorizationResponse& in, iso20_AuthorizationResType& out) {
     init_iso20_AuthorizationResType(&out);
 
@@ -42,6 +68,12 @@ template <> void insert_type(VariantAccess& va, const struct iso20_Authorization
     va.insert_type<AuthorizationRequest>(in);
 };
 
+//RBL handle the response
+template <> void insert_type(VariantAccess& va, const struct iso20_AuthorizationResType& in) {
+    va.insert_type<AuthorizationResponse>(in);
+};
+
+
 template <> int serialize_to_exi(const AuthorizationResponse& in, exi_bitstream_t& out) {
     iso20_exiDocument doc;
     init_iso20_exiDocument(&doc);
@@ -53,7 +85,24 @@ template <> int serialize_to_exi(const AuthorizationResponse& in, exi_bitstream_
     return encode_iso20_exiDocument(&out, &doc);
 }
 
+//RDB output the request
+template <> int serialize_to_exi(const AuthorizationRequest& in, exi_bitstream_t& out) {
+    iso20_exiDocument doc;
+    init_iso20_exiDocument(&doc);
+
+    CB_SET_USED(doc.AuthorizationReq);
+
+    convert(in, doc.AuthorizationReq);
+
+    return encode_iso20_exiDocument(&out, &doc);
+}
+
 template <> size_t serialize(const AuthorizationResponse& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
+//RDB output the request
+template <> size_t serialize(const AuthorizationRequest& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
 

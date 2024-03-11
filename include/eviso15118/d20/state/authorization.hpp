@@ -13,6 +13,7 @@ struct Authorization : public FsmSimpleState {
     void enter() final;
 
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
+    message_20::AuthorizationRequest setup_request(const d20::Session &session);
 
 private:
     message_20::AuthStatus authorization_status{message_20::AuthStatus::Pending};
