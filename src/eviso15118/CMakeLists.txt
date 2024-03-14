@@ -54,12 +54,12 @@ target_sources(eviso15118
         d20/state/service_discovery.cpp
         d20/state/service_detail.cpp
         d20/state/service_selection.cpp
-#         d20/state/dc_charge_parameter_discovery.cpp
-#         d20/state/schedule_exchange.cpp
-#         d20/state/dc_cable_check.cpp
-#         d20/state/dc_pre_charge.cpp
-#         d20/state/power_delivery.cpp
-#         d20/state/dc_charge_loop.cpp
+        d20/state/dc_charge_parameter_discovery.cpp
+        d20/state/schedule_exchange.cpp
+        d20/state/dc_cable_check.cpp
+        d20/state/dc_pre_charge.cpp
+        d20/state/power_delivery.cpp
+        d20/state/dc_charge_loop.cpp
 #         d20/state/dc_welding_detection.cpp
 #         d20/state/session_stop.cpp
 
@@ -72,12 +72,12 @@ target_sources(eviso15118
         message/service_discovery.cpp
         message/service_detail.cpp
         message/service_selection.cpp
-#         message/dc_charge_parameter_discovery.cpp
-#         message/schedule_exchange.cpp
-#         message/dc_cable_check.cpp
-#         message/dc_pre_charge.cpp
-#         message/power_delivery.cpp
-#         message/dc_charge_loop.cpp
+        message/dc_charge_parameter_discovery.cpp
+        message/schedule_exchange.cpp
+        message/dc_cable_check.cpp
+        message/dc_pre_charge.cpp
+        message/power_delivery.cpp
+        message/dc_charge_loop.cpp
 #         message/dc_welding_detection.cpp
 #         message/session_stop.cpp
 

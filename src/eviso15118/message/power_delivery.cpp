@@ -58,6 +58,31 @@ template <> void convert(const struct iso20_PowerDeliveryReqType& in, PowerDeliv
     CB2CPP_CONVERT_IF_USED(in.BPT_ChannelSelection, out.channel_selection);
 }
 
+//RBL Add the conversion for the response from the EVCC
+template <> void convert(const struct iso20_PowerDeliveryResType& in, PowerDeliveryResponse& out) {
+
+    cb_convert_enum(in.ResponseCode, out.response_code);
+    
+    if(in.EVSEStatus_isUsed == true){
+        //RDB TODO do something here
+    }
+    
+    convert(in.Header, out.header);
+   
+}
+
+//RDB Add conversion for the request to convert to exi
+template <> void convert(const PowerDeliveryRequest& in, iso20_PowerDeliveryReqType& out) {
+    init_iso20_PowerDeliveryReqType(&out);
+
+    //RDB TODO Handle the various optional things in the request
+    out.ChargeProgress=iso20_chargeProgressType_Start;
+
+    convert(in.header, out.Header);
+
+}
+
+
 template <> void convert(const PowerDeliveryResponse& in, iso20_PowerDeliveryResType& out) {
     init_iso20_PowerDeliveryResType(&out);
 
@@ -71,6 +96,12 @@ template <> void insert_type(VariantAccess& va, const struct iso20_PowerDelivery
     va.insert_type<PowerDeliveryRequest>(in);
 };
 
+//RBL handle the response
+template <> void insert_type(VariantAccess& va, const struct iso20_PowerDeliveryResType& in) {
+    va.insert_type<PowerDeliveryResponse>(in);
+};
+
+
 template <> int serialize_to_exi(const PowerDeliveryResponse& in, exi_bitstream_t& out) {
     iso20_exiDocument doc;
     init_iso20_exiDocument(&doc);
@@ -82,8 +113,26 @@ template <> int serialize_to_exi(const PowerDeliveryResponse& in, exi_bitstream_
     return encode_iso20_exiDocument(&out, &doc);
 }
 
+//RDB output the request
+template <> int serialize_to_exi(const PowerDeliveryRequest& in, exi_bitstream_t& out) {
+    iso20_exiDocument doc;
+    init_iso20_exiDocument(&doc);
+
+    CB_SET_USED(doc.PowerDeliveryReq);
+
+    convert(in, doc.PowerDeliveryReq);
+
+    return encode_iso20_exiDocument(&out, &doc);
+}
+
 template <> size_t serialize(const PowerDeliveryResponse& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
+
+//RDB output the request
+template <> size_t serialize(const PowerDeliveryRequest& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
 
 } // namespace eviso15118::message_20

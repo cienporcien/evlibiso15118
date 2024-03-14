@@ -12,6 +12,7 @@ struct DC_CableCheck : public FsmSimpleState {
     void enter() final;
 
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
+    message_20::DC_CableCheckRequest setup_request(const d20::Session &session);
 
 private:
     bool cable_check_initiated{false};

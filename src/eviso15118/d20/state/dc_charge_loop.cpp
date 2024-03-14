@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2023 Pionix GmbH and Contributors to EVerest
+// Copyright 2023 Pionix GmbH and Contributors to EVereqt
+#include <thread>
 #include <eviso15118/d20/state/dc_charge_loop.hpp>
 #include <eviso15118/d20/state/dc_welding_detection.hpp>
 
@@ -10,134 +11,131 @@
 
 namespace eviso15118::d20::state {
 
-using Scheduled_DC_Req = message_20::DC_ChargeLoopRequest::Scheduled_DC_CLReqControlMode;
-using Scheduled_BPT_DC_Req = message_20::DC_ChargeLoopRequest::BPT_Scheduled_DC_CLReqControlMode;
-using Dynamic_DC_Req = message_20::DC_ChargeLoopRequest::Dynamic_DC_CLReqControlMode;
-using Dynamic_BPT_DC_Req = message_20::DC_ChargeLoopRequest::BPT_Dynamic_DC_CLReqControlMode;
-
 using Scheduled_DC_Res = message_20::DC_ChargeLoopResponse::Scheduled_DC_CLResControlMode;
 using Scheduled_BPT_DC_Res = message_20::DC_ChargeLoopResponse::BPT_Scheduled_DC_CLResControlMode;
+using Dynamic_DC_Res = message_20::DC_ChargeLoopResponse::Dynamic_DC_CLResControlMode;
+using Dynamic_BPT_DC_Res = message_20::DC_ChargeLoopResponse::BPT_Dynamic_DC_CLResControlMode;
 
-std::tuple<message_20::DC_ChargeLoopResponse, std::optional<session::feedback::DcChargeTarget>>
-handle_request(const message_20::DC_ChargeLoopRequest& req, const d20::Session& session, const float present_voltage,
-               const float present_current) {
+using Scheduled_DC_Req = message_20::DC_ChargeLoopRequest::Scheduled_DC_CLReqControlMode;
+using Scheduled_BPT_DC_Req = message_20::DC_ChargeLoopRequest::BPT_Scheduled_DC_CLReqControlMode;
 
-    message_20::DC_ChargeLoopResponse res;
-    std::optional<session::feedback::DcChargeTarget> charge_target{std::nullopt};
+// std::tuple<message_20::DC_ChargeLoopRequest, std::optional<session::feedback::DcChargeTarget>>
+// handle_response(const message_20::DC_ChargeLoopResponse& res, const d20::Session& session, const float preqent_voltage,
+//                const float preqent_current) {
 
-    if (std::holds_alternative<Scheduled_DC_Req>(req.control_mode)) {
+//     message_20::DC_ChargeLoopRequest req;
+//     std::optional<session::feedback::DcChargeTarget> charge_target{std::nullopt};
 
-        if (session.get_selected_energy_service() != message_20::ServiceCategory::DC) {
-            return {response_with_code(res, message_20::ResponseCode::FAILED), charge_target};
-        }
+//     if (std::holds_alternative<Scheduled_DC_Res>(res.control_mode)) {
 
-        const auto& req_mode = std::get<Scheduled_DC_Req>(req.control_mode);
+//         if (session.get_selected_energy_service() != message_20::ServiceCategory::DC) {
+//             return {request_with_code(req, message_20::RequestCode::FAILED), charge_target};
+//         }
 
-        charge_target = {
-            message_20::from_RationalNumber(req_mode.target_voltage),
-            message_20::from_RationalNumber(req_mode.target_current),
-        };
+//         const auto& res_mode = std::get<Scheduled_DC_Res>(res.control_mode);
 
-        auto& mode = res.control_mode.emplace<Scheduled_DC_Res>();
+//         charge_target = {
+//             message_20::from_RationalNumber(res_mode.target_voltage),
+//             message_20::from_RationalNumber(res_mode.target_current),
+//         };
 
-    } else if (std::holds_alternative<Scheduled_BPT_DC_Req>(req.control_mode)) {
+//         auto& mode = req.control_mode.emplace<Scheduled_DC_Req>();
 
-        if (session.get_selected_energy_service() != message_20::ServiceCategory::DC_BPT) {
-            return {response_with_code(res, message_20::ResponseCode::FAILED), charge_target};
-        }
+//     } else if (std::holds_alternative<Scheduled_BPT_DC_Res>(res.control_mode)) {
 
-        const auto& req_mode = std::get<Scheduled_BPT_DC_Req>(req.control_mode);
+//         if (session.get_selected_energy_service() != message_20::ServiceCategory::DC_BPT) {
+//             return {request_with_code(req, message_20::RequestCode::FAILED), charge_target};
+//         }
 
-        charge_target = {
-            message_20::from_RationalNumber(req_mode.target_voltage),
-            message_20::from_RationalNumber(req_mode.target_current),
-        };
+//         const auto& res_mode = std::get<Scheduled_BPT_DC_Res>(res.control_mode);
 
-        auto& mode = res.control_mode.emplace<Scheduled_BPT_DC_Res>();
-    }
+//         charge_target = {
+//             message_20::from_RationalNumber(res_mode.target_voltage),
+//             message_20::from_RationalNumber(res_mode.target_current),
+//         };
 
-    res.present_voltage = eviso15118::message_20::from_float(present_voltage);
-    res.present_current = eviso15118::message_20::from_float(present_current);
+//         auto& mode = req.control_mode.emplace<Scheduled_BPT_DC_Req>();
+//     }
 
-    if (validate_and_setup_header(res.header, session, req.header.session_id) == false) {
-        return {response_with_code(res, message_20::ResponseCode::FAILED_UnknownSession), charge_target};
-    }
+//     req.preqent_voltage = eviso15118::message_20::from_float(preqent_voltage);
+//     req.preqent_current = eviso15118::message_20::from_float(preqent_current);
 
-    return {response_with_code(res, message_20::ResponseCode::OK), charge_target};
+//     if (validate_and_setup_header(req.header, session, res.header.session_id) == false) {
+//         return {request_with_code(req, message_20::RequestCode::FAILED_UnknownSession), charge_target};
+//     }
+
+//     return {request_with_code(req, message_20::RequestCode::OK), charge_target};
+// }
+
+
+//RDB - setup the request message to avoid duplication
+message_20::DC_ChargeLoopRequest DC_ChargeLoop::setup_request(const d20::Session &session)
+{
+    message_20::DC_ChargeLoopRequest req;
+    setup_header(req.header,session);
+    message_20::RequestCode request_code  = message_20::RequestCode::OK;
+    return request_with_code(req, request_code);
 }
+
+
 
 void DC_ChargeLoop::enter() {
     ctx.log.enter_state("DC_ChargeLoop");
+    //Prepare and send the request
+    const auto req = DC_ChargeLoop::setup_request(ctx.session);
+    ctx.request(req);
+
 }
 
 FsmSimpleState::HandleEventReturnType DC_ChargeLoop::handle_event(AllocatorType& sa, FsmEvent ev) {
 
-    if (ev == FsmEvent::CONTROL_MESSAGE) {
-        const auto control_data = ctx.get_control_event<PresentVoltageCurrent>();
-        if (not control_data) {
-            // FIXME (aw): error handling
-            return sa.HANDLED_INTERNALLY;
-        }
-
-        present_voltage = control_data->voltage;
-        present_current = control_data->current;
-
-        return sa.HANDLED_INTERNALLY;
-    }
 
     if (ev != FsmEvent::V2GTP_MESSAGE) {
         return sa.PASS_ON;
     }
 
-    const auto variant = ctx.get_request();
+    const auto variant = ctx.get_response();
 
-    if (const auto req = variant->get_if<message_20::PowerDeliveryRequest>()) {
-        const auto res = handle_request(*req, ctx.session);
+    if (const auto res = variant->get_if<message_20::PowerDeliveryResponse>()) {
 
-        ctx.respond(res);
-
-        if (res.response_code >= message_20::ResponseCode::FAILED) {
+        if (res->response_code >= message_20::ResponseCode::FAILED) {
             ctx.session_stopped = true;
             return sa.PASS_ON;
         }
 
-        // Reset
-        first_entry_in_charge_loop = true;
+        // Reqet
+        // first_entry_in_charge_loop = true;
 
-        // Todo(sl): React properly to Start, Stop, Standby and ScheduleRenegotiation
-        if (req->charge_progress == message_20::PowerDeliveryRequest::Progress::Stop) {
-            ctx.feedback.signal(session::feedback::Signal::CHARGE_LOOP_FINISHED);
-            ctx.feedback.signal(session::feedback::Signal::DC_OPEN_CONTACTOR);
-            return sa.create_simple<DC_WeldingDetection>(ctx);
-        }
+        // // Todo(sl): React properly to Start, Stop, Standby and ScheduleRenegotiation
+        // if (res->response_code == message_20::PowerDeliveryResponse::Progreqs::Stop) {
+        //     ctx.feedback.signal(session::feedback::Signal::CHARGE_LOOP_FINISHED);
+        //     ctx.feedback.signal(session::feedback::Signal::DC_OPEN_CONTACTOR);
+        //     return sa.create_simple<DC_WeldingDetection>(ctx);
+        // }
 
-        return sa.HANDLED_INTERNALLY;
-    } else if (const auto req = variant->get_if<message_20::DC_ChargeLoopRequest>()) {
-        if (first_entry_in_charge_loop) {
-            ctx.feedback.signal(session::feedback::Signal::CHARGE_LOOP_STARTED);
-            first_entry_in_charge_loop = false;
-        }
+//        return sa.HANDLED_INTERNALLY;
+    } else if (const auto res = variant->get_if<message_20::DC_ChargeLoopResponse>()) {
 
-        const auto [res, charge_target] = handle_request(*req, ctx.session, present_voltage, present_current);
 
-        if (charge_target) {
-            ctx.feedback.dc_charge_target(charge_target.value());
-        }
-
-        ctx.respond(res);
-
-        if (res.response_code >= message_20::ResponseCode::FAILED) {
+        if (res->response_code >= message_20::ResponseCode::FAILED) {
             ctx.session_stopped = true;
             return sa.PASS_ON;
         }
+
+        // Prepare and send the request
+        //  Wait a little bit to slow things down otherwise too many messages.
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+        const auto req = DC_ChargeLoop::setup_request(ctx.session);
+        ctx.request(req);
 
         return sa.HANDLED_INTERNALLY;
     } else {
-        ctx.log("Expected PowerDeliveryReq or DC_ChargeLoopReq! But code type id: %d", variant->get_type());
+        ctx.log("Expected PowerDeliveryRes or DC_ChargeLoopRes! But code type id: %d", variant->get_type());
 
         // Sequence Error
-        const message_20::Type req_type = variant->get_type();
-        send_sequence_error(req_type, ctx);
+        const message_20::Type res_type = variant->get_type();
+        send_sequence_error(res_type, ctx);
 
         ctx.session_stopped = true;
         return sa.PASS_ON;

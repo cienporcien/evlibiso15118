@@ -12,6 +12,7 @@ struct ScheduleExchange : public FsmSimpleState {
     void enter() final;
 
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
+    message_20::ScheduleExchangeRequest setup_request(const d20::Session &session, const d20::SessionConfig& config);
 };
 
 } // namespace eviso15118::d20::state

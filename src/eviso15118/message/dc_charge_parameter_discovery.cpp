@@ -46,6 +46,67 @@ template <> void convert(const struct iso20_dc_BPT_DC_CPDReqEnergyTransferModeTy
     convert(in.EVMinimumDischargeCurrent, out.min_discharge_current);
 }
 
+//RDB conversion for res
+template <> void convert(const struct iso20_dc_DC_CPDResEnergyTransferModeType& in, DC_ModeRes& out) {
+    convert(in.EVSEMaximumChargePower, out.max_charge_power);
+    convert(in.EVSEMinimumChargePower, out.min_charge_power);
+    convert(in.EVSEMaximumChargeCurrent, out.max_charge_current);
+    convert(in.EVSEMinimumChargeCurrent, out.min_charge_current);
+    convert(in.EVSEMaximumVoltage, out.max_voltage);
+    convert(in.EVSEMinimumVoltage, out.min_voltage);
+    
+    //RDB TODO Fix the conversion of an optional rational
+    // if (in.EVSEPowerRampLimitation_isUsed) {
+    //     convert(in.EVSEPowerRampLimitation, out.power_ramp_limit);
+    // }
+}
+
+//RDB inverse conversion for req
+template <> void convert(const DC_ModeReq& in, struct iso20_dc_DC_CPDReqEnergyTransferModeType&out) {
+    convert(in.max_charge_power, out.EVMaximumChargePower);
+    convert(in.min_charge_power, out.EVMinimumChargePower);
+    convert(in.max_charge_current, out.EVMaximumChargeCurrent);
+    convert(in.min_charge_current, out.EVMinimumChargeCurrent);
+    convert(in.max_voltage, out.EVMaximumVoltage);
+    convert(in.min_voltage, out.EVMinimumVoltage);
+
+    //RDB TODO This conversion doesnt exist so fake it
+    //convert(in.target_soc, out.TargetSOC);
+    out.TargetSOC=100;
+    out.TargetSOC_isUsed=true;
+    
+}
+
+//RBL Add the conversion for the response from the EVCC
+template <> void convert(const struct iso20_dc_DC_ChargeParameterDiscoveryResType& in, DC_ChargeParameterDiscoveryResponse& out) {
+
+    cb_convert_enum(in.ResponseCode, out.response_code);
+
+    //RDB TODO Add BPT
+    auto& out_mode = std::get<DC_ModeRes>(out.transfer_mode);
+    convert(in.DC_CPDResEnergyTransferMode, out_mode);
+    
+    convert(in.Header, out.header);
+   
+}
+
+//RDB Add conversion for the request to convert to exi
+template <> void convert(const DC_ChargeParameterDiscoveryRequest& in, iso20_dc_DC_ChargeParameterDiscoveryReqType& out) {
+    init_iso20_dc_DC_ChargeParameterDiscoveryReqType(&out);
+
+    //RDB TODO Handle the various options in the request
+    //Only DC at the moment.
+    auto& in_mode = std::get<DC_ModeReq>(in.transfer_mode);
+    convert(in_mode, out.DC_CPDReqEnergyTransferMode);
+    
+    out.DC_CPDReqEnergyTransferMode_isUsed=true;
+    out.BPT_DC_CPDReqEnergyTransferMode_isUsed=false;
+
+    convert(in.header, out.Header);
+
+}
+
+
 template <>
 void convert(const struct iso20_dc_DC_ChargeParameterDiscoveryReqType& in, DC_ChargeParameterDiscoveryRequest& out) {
     convert(in.Header, out.header);
@@ -65,6 +126,11 @@ void convert(const struct iso20_dc_DC_ChargeParameterDiscoveryReqType& in, DC_Ch
 template <> void insert_type(VariantAccess& va, const struct iso20_dc_DC_ChargeParameterDiscoveryReqType& in) {
     va.insert_type<DC_ChargeParameterDiscoveryRequest>(in);
 }
+
+//RBL handle the response
+template <> void insert_type(VariantAccess& va, const struct iso20_dc_DC_ChargeParameterDiscoveryResType& in) {
+    va.insert_type<DC_ChargeParameterDiscoveryResponse>(in);
+};
 
 struct ModeResponseVisitor {
     ModeResponseVisitor(iso20_dc_DC_ChargeParameterDiscoveryResType& res_) : res(res_){};
@@ -127,7 +193,24 @@ template <> int serialize_to_exi(const DC_ChargeParameterDiscoveryResponse& in, 
     return encode_iso20_dc_exiDocument(&out, &doc);
 }
 
+//RDB output the request
+template <> int serialize_to_exi(const DC_ChargeParameterDiscoveryRequest& in, exi_bitstream_t& out) {
+    iso20_dc_exiDocument doc;
+    init_iso20_dc_exiDocument(&doc);
+
+    CB_SET_USED(doc.DC_ChargeParameterDiscoveryReq);
+
+    convert(in, doc.DC_ChargeParameterDiscoveryReq);
+
+    return encode_iso20_dc_exiDocument(&out, &doc);
+}
+
 template <> size_t serialize(const DC_ChargeParameterDiscoveryResponse& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
+//RDB output the request
+template <> size_t serialize(const DC_ChargeParameterDiscoveryRequest& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
 

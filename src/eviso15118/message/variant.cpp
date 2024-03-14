@@ -55,10 +55,10 @@ static void handle_main(VariantAccess& va) {
          insert_type(va, doc.ServiceDetailRes);
      } else if (doc.ServiceSelectionRes_isUsed) {
          insert_type(va, doc.ServiceSelectionRes);
-    // } else if (doc.ScheduleExchangeRes_isUsed) {
-    //     insert_type(va, doc.ScheduleExchangeRes);
-    // } else if (doc.PowerDeliveryRes_isUsed) {
-    //     insert_type(va, doc.PowerDeliveryRes);
+     } else if (doc.ScheduleExchangeRes_isUsed) {
+         insert_type(va, doc.ScheduleExchangeRes);
+     } else if (doc.PowerDeliveryRes_isUsed) {
+         insert_type(va, doc.PowerDeliveryRes);
     // } else if (doc.SessionStopRes_isUsed) {
     //     insert_type(va, doc.SessionStopRes);
     } else {
@@ -77,13 +77,13 @@ static void handle_dc(VariantAccess& va) {
     }
 
     if (doc.DC_ChargeParameterDiscoveryRes_isUsed) {
-    //     insert_type(va, doc.DC_ChargeParameterDiscoveryRes);
-    // } else if (doc.DC_CableCheckRes_isUsed) {
-    //     insert_type(va, doc.DC_CableCheckRes);
-    // } else if (doc.DC_PreChargeRes_isUsed) {
-    //     insert_type(va, doc.DC_PreChargeRes);
-    // } else if (doc.DC_ChargeLoopRes_isUsed) {
-    //     insert_type(va, doc.DC_ChargeLoopRes);
+        insert_type(va, doc.DC_ChargeParameterDiscoveryRes);
+     } else if (doc.DC_CableCheckRes_isUsed) {
+         insert_type(va, doc.DC_CableCheckRes);
+     } else if (doc.DC_PreChargeRes_isUsed) {
+         insert_type(va, doc.DC_PreChargeRes);
+     } else if (doc.DC_ChargeLoopRes_isUsed) {
+         insert_type(va, doc.DC_ChargeLoopRes);
     // } else if (doc.DC_WeldingDetectionRes_isUsed) {
     //     insert_type(va, doc.DC_WeldingDetectionRes);
     } else {

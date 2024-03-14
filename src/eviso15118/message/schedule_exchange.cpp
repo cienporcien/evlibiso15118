@@ -77,6 +77,7 @@ void convert(const struct iso20_Scheduled_SEReqControlModeType& in,
     CB2CPP_CONVERT_IF_USED(in.EVEnergyOffer, out.energy_offer);
 }
 
+
 template <>
 void convert(const struct iso20_Dynamic_SEReqControlModeType& in,
              ScheduleExchangeRequest::Dynamic_SEReqControlMode& out) {
@@ -105,6 +106,33 @@ template <> void convert(const struct iso20_ScheduleExchangeReqType& in, Schedul
         throw std::runtime_error("No control mode selected in iso20_ScheduleExchangeReqType");
     }
 }
+
+//RBL Add the conversion for the response from the EVCC
+//RDB TODO fix this correctly.
+template <> void convert(const struct iso20_ScheduleExchangeResType& in, ScheduleExchangeResponse& out) {
+    convert(in.Header, out.header);
+
+    
+    if (in.Dynamic_SEResControlMode_isUsed) {
+        auto& mode_out = out.control_mode.emplace<ScheduleExchangeResponse::Dynamic_SEResControlMode>();
+        //convert(in.Dynamic_SEResControlMode, mode_out);
+    } else if (in.Scheduled_SEResControlMode_isUsed) {
+        auto& mode_out = out.control_mode.emplace<ScheduleExchangeResponse::Scheduled_SEResControlMode>();
+        //convert(in.Scheduled_SEResControlMode, mode_out);
+    } else {
+        throw std::runtime_error("No control mode selected in iso20_ScheduleExchangeResType");
+    }
+}
+
+//RDB Add conversion for the request to convert to exi
+template <> void convert(const ScheduleExchangeRequest& in, iso20_ScheduleExchangeReqType& out) {
+    init_iso20_ScheduleExchangeReqType(&out);
+
+    //RDB TODO Handle the various options in the request
+
+    convert(in.header, out.Header);
+}
+
 
 template <> void convert(const ScheduleExchangeResponse::PowerSchedule& in, struct iso20_PowerScheduleType& out) {
     init_iso20_PowerScheduleType(&out);
@@ -230,6 +258,12 @@ template <> void insert_type(VariantAccess& va, const struct iso20_ScheduleExcha
     va.insert_type<ScheduleExchangeRequest>(in);
 };
 
+//RBL handle the response
+template <> void insert_type(VariantAccess& va, const struct iso20_ScheduleExchangeResType& in) {
+    va.insert_type<ScheduleExchangeResponse>(in);
+};
+
+
 template <> int serialize_to_exi(const ScheduleExchangeResponse& in, exi_bitstream_t& out) {
     iso20_exiDocument doc;
     init_iso20_exiDocument(&doc);
@@ -241,8 +275,26 @@ template <> int serialize_to_exi(const ScheduleExchangeResponse& in, exi_bitstre
     return encode_iso20_exiDocument(&out, &doc);
 }
 
+//RDB output the request
+template <> int serialize_to_exi(const ScheduleExchangeRequest& in, exi_bitstream_t& out) {
+    iso20_exiDocument doc;
+    init_iso20_exiDocument(&doc);
+
+    CB_SET_USED(doc.ScheduleExchangeReq);
+
+    convert(in, doc.ScheduleExchangeReq);
+
+    return encode_iso20_exiDocument(&out, &doc);
+}
+
 template <> size_t serialize(const ScheduleExchangeResponse& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
+
+//RDB output the request
+template <> size_t serialize(const ScheduleExchangeRequest& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
 
 } // namespace eviso15118::message_20

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2023 Pionix GmbH and Contributors to EVerest
+// Copyright 2023 Pionix GmbH and Contributors to EVereqt
 #include <ctime>
 
 #include <eviso15118/d20/state/dc_cable_check.hpp>
@@ -12,59 +12,34 @@
 
 namespace eviso15118::d20::state {
 
-message_20::ScheduleExchangeResponse handle_request(const message_20::ScheduleExchangeRequest& req,
-                                                    const d20::Session& session,
-                                                    const message_20::RationalNumber& max_power) {
 
-    message_20::ScheduleExchangeResponse res;
 
-    if (validate_and_setup_header(res.header, session, req.header.session_id) == false) {
-        return response_with_code(res, message_20::ResponseCode::FAILED_UnknownSession);
-    }
+//RDB - setup the request message to avoid duplication
+message_20::ScheduleExchangeRequest ScheduleExchange::setup_request(const d20::Session &session, const d20::SessionConfig &config)
+{
+    message_20::ScheduleExchangeRequest req;
+    setup_header(req.header, session);
+    message_20::RequestCode request_code = message_20::RequestCode::OK;
 
-    // Todo(SL): Publish data from request?
+    // RDB TODO do this properly
+    req.max_supporting_points = 1024;
 
-    if (session.get_selected_control_mode() == message_20::ControlMode::Scheduled &&
-        std::holds_alternative<message_20::ScheduleExchangeRequest::Scheduled_SEReqControlMode>(req.control_mode)) {
+    auto &control_mode =
+        req.control_mode.emplace<message_20::ScheduleExchangeRequest::Scheduled_SEReqControlMode>();
 
-        auto& control_mode =
-            res.control_mode.emplace<message_20::ScheduleExchangeResponse::Scheduled_SEResControlMode>();
+    //Set one of the optional members
+    message_20::RationalNumber max_energy = {20, 3};
+    control_mode.max_energy.emplace<>(max_energy);
 
-        // Define one minimal default schedule
-        // No price schedule, no discharging power schedule
-        // Todo(sl): Adding price schedule
-        // Todo(sl): Adding discharging schedule
-        message_20::ScheduleExchangeResponse::ScheduleTuple schedule;
-        schedule.schedule_tuple_id = 1;
-        schedule.charging_schedule.power_schedule.time_anchor =
-            static_cast<uint64_t>(std::time(nullptr)); // PowerSchedule is now active
+    return request_with_code(req, request_code);
 
-        message_20::ScheduleExchangeResponse::PowerScheduleEntry power_schedule;
-        power_schedule.power = max_power;
-        power_schedule.duration = message_20::ScheduleExchangeResponse::SCHEDULED_POWER_DURATION_S;
-
-        schedule.charging_schedule.power_schedule.entries.push_back(power_schedule);
-
-        control_mode.schedule_tuple.push_back(schedule);
-
-    } else if (session.get_selected_control_mode() == message_20::ControlMode::Dynamic &&
-               std::holds_alternative<message_20::ScheduleExchangeRequest::Dynamic_SEReqControlMode>(
-                   req.control_mode)) {
-
-        auto& control_mode = res.control_mode.emplace<message_20::ScheduleExchangeResponse::Dynamic_SEResControlMode>();
-
-    } else {
-        logf("The control mode of the req message does not match the previously agreed contol mode.");
-        return response_with_code(res, message_20::ResponseCode::FAILED);
-    }
-
-    res.processing = message_20::Processing::Finished;
-
-    return response_with_code(res, message_20::ResponseCode::OK);
 }
 
 void ScheduleExchange::enter() {
     ctx.log.enter_state("ScheduleExchange");
+    //Prepare and send the request
+    const auto req = ScheduleExchange::setup_request(ctx.session, ctx.config);
+    ctx.request(req);
 }
 
 FsmSimpleState::HandleEventReturnType ScheduleExchange::handle_event(AllocatorType& sa, FsmEvent ev) {
@@ -72,47 +47,35 @@ FsmSimpleState::HandleEventReturnType ScheduleExchange::handle_event(AllocatorTy
         return sa.PASS_ON;
     }
 
-    const auto variant = ctx.get_request();
+    const auto variant = ctx.get_response();
 
-    if (const auto req = variant->get_if<message_20::ScheduleExchangeRequest>()) {
+    if (const auto res = variant->get_if<message_20::ScheduleExchangeResponse>()) {
 
         message_20::RationalNumber max_charge_power = {0, 0};
 
-        const auto selected_energy_service = ctx.session.get_selected_energy_service();
 
-        if (selected_energy_service == message_20::ServiceCategory::DC) {
-            max_charge_power = ctx.config.evse_dc_parameter.max_charge_power;
-        } else if (selected_energy_service == message_20::ServiceCategory::DC_BPT) {
-            max_charge_power = ctx.config.evse_dc_bpt_parameter.max_charge_power;
-        }
-
-        const auto res = handle_request(*req, ctx.session, max_charge_power);
-
-        ctx.respond(res);
-
-        if (res.response_code >= message_20::ResponseCode::FAILED) {
+        if (res->response_code >= message_20::ResponseCode::FAILED) {
             ctx.session_stopped = true;
             return sa.PASS_ON;
         }
 
-        if (res.processing == message_20::Processing::Ongoing) {
+        if (res->processing == message_20::Processing::Ongoing) {
             return sa.HANDLED_INTERNALLY;
         }
 
         return sa.create_simple<DC_CableCheck>(ctx);
-    } else if (const auto req = variant->get_if<message_20::SessionStopRequest>()) {
-        const auto res = handle_request(*req, ctx.session);
+        
 
-        ctx.respond(res);
+    } else if (const auto res = variant->get_if<message_20::SessionStopResponse>()) {
         ctx.session_stopped = true;
 
         return sa.PASS_ON;
     } else {
-        ctx.log("expected ScheduleExchangeReq! But code type id: %d", variant->get_type());
+        ctx.log("expected ScheduleExchangeRes! But code type id: %d", variant->get_type());
 
         // Sequence Error
-        const message_20::Type req_type = variant->get_type();
-        send_sequence_error(req_type, ctx);
+        const message_20::Type res_type = variant->get_type();
+        send_sequence_error(res_type, ctx);
 
         ctx.session_stopped = true;
         return sa.PASS_ON;
