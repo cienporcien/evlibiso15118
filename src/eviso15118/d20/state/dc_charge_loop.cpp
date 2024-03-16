@@ -3,6 +3,7 @@
 #include <thread>
 #include <eviso15118/d20/state/dc_charge_loop.hpp>
 #include <eviso15118/d20/state/dc_welding_detection.hpp>
+#include <eviso15118/d20/state/power_delivery.hpp>
 
 #include <eviso15118/detail/d20/context_helper.hpp>
 #include <eviso15118/detail/d20/state/dc_charge_loop.hpp>
@@ -87,18 +88,46 @@ void DC_ChargeLoop::enter() {
 
 }
 
-FsmSimpleState::HandleEventReturnType DC_ChargeLoop::handle_event(AllocatorType& sa, FsmEvent ev) {
+FsmSimpleState::HandleEventReturnType DC_ChargeLoop::handle_event(AllocatorType &sa, FsmEvent ev)
+{
 
+    if (ev == FsmEvent::CONTROL_MESSAGE)
+    {
+        const auto control_data = ctx.get_control_event<StartStopCharging>();
+        if (not control_data)
+        {
+            // FIXME (aw): error handling
+            return sa.HANDLED_INTERNALLY;
+        }
 
-    if (ev != FsmEvent::V2GTP_MESSAGE) {
+        //TODO RDB handle the different possibilities of StartStopCharging
+        if (*control_data)
+        {
+            // authorization_status = AuthStatus::Accepted;
+        }
+        else
+        {
+            // authorization_status = AuthStatus::Rejected;
+        }
+
+        ctx.session.ChargerStartStop=false;
+        logf("ctx.session.ChargerStartStop=false\n");
+        
+        return sa.HANDLED_INTERNALLY;
+    }
+
+    if (ev != FsmEvent::V2GTP_MESSAGE)
+    {
         return sa.PASS_ON;
     }
 
     const auto variant = ctx.get_response();
 
-    if (const auto res = variant->get_if<message_20::PowerDeliveryResponse>()) {
+    if (const auto res = variant->get_if<message_20::PowerDeliveryResponse>())
+    {
 
-        if (res->response_code >= message_20::ResponseCode::FAILED) {
+        if (res->response_code >= message_20::ResponseCode::FAILED)
+        {
             ctx.session_stopped = true;
             return sa.PASS_ON;
         }
@@ -112,25 +141,39 @@ FsmSimpleState::HandleEventReturnType DC_ChargeLoop::handle_event(AllocatorType&
         //     ctx.feedback.signal(session::feedback::Signal::DC_OPEN_CONTACTOR);
         //     return sa.create_simple<DC_WeldingDetection>(ctx);
         // }
+        logf("PowerDeliveryResponse encountered in dc charge loop\n");
+        return sa.HANDLED_INTERNALLY;
+    }
+    else if (const auto res = variant->get_if<message_20::DC_ChargeLoopResponse>())
+    {
 
-//        return sa.HANDLED_INTERNALLY;
-    } else if (const auto res = variant->get_if<message_20::DC_ChargeLoopResponse>()) {
-
-
-        if (res->response_code >= message_20::ResponseCode::FAILED) {
+        if (res->response_code >= message_20::ResponseCode::FAILED)
+        {
             ctx.session_stopped = true;
             return sa.PASS_ON;
         }
 
         // Prepare and send the request
         //  Wait a little bit to slow things down otherwise too many messages.
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
-        const auto req = DC_ChargeLoop::setup_request(ctx.session);
-        ctx.request(req);
+        if (ctx.session.ChargerStartStop == true)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
+            logf("Normal dc charge loop\n");
+            const auto req = DC_ChargeLoop::setup_request(ctx.session);
+            ctx.request(req);
 
-        return sa.HANDLED_INTERNALLY;
-    } else {
+            return sa.HANDLED_INTERNALLY;
+        }
+        else
+        {
+            // Power Delivery stop sent next
+            logf("Next message will be power delivery stop\n");
+            return sa.create_simple<PowerDelivery>(ctx);
+        }
+    }
+    else
+    {
         ctx.log("Expected PowerDeliveryRes or DC_ChargeLoopRes! But code type id: %d", variant->get_type());
 
         // Sequence Error

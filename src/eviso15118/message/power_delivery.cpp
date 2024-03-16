@@ -76,7 +76,7 @@ template <> void convert(const PowerDeliveryRequest& in, iso20_PowerDeliveryReqT
     init_iso20_PowerDeliveryReqType(&out);
 
     //RDB TODO Handle the various optional things in the request
-    out.ChargeProgress=iso20_chargeProgressType_Start;
+    cb_convert_enum(in.charge_progress, out.ChargeProgress);
 
     convert(in.header, out.Header);
 

@@ -60,8 +60,8 @@ target_sources(eviso15118
         d20/state/dc_pre_charge.cpp
         d20/state/power_delivery.cpp
         d20/state/dc_charge_loop.cpp
-#         d20/state/dc_welding_detection.cpp
-#         d20/state/session_stop.cpp
+        d20/state/dc_welding_detection.cpp
+        d20/state/session_stop.cpp
 
         message/variant.cpp
         message/supported_app_protocol.cpp
@@ -78,8 +78,8 @@ target_sources(eviso15118
         message/dc_pre_charge.cpp
         message/power_delivery.cpp
         message/dc_charge_loop.cpp
-#         message/dc_welding_detection.cpp
-#         message/session_stop.cpp
+        message/dc_welding_detection.cpp
+        message/session_stop.cpp
 
         d2/fsm.cpp
         d2/context.cpp

@@ -13,7 +13,7 @@ struct PowerDelivery : public FsmSimpleState {
 
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
     
-    message_20::PowerDeliveryRequest setup_request(const d20::Session &session);
+    message_20::PowerDeliveryRequest setup_request(const d20::Session &session, const bool StartStop);
 
 private:
     float present_voltage{0};

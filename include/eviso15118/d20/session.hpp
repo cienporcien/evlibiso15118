@@ -111,6 +111,8 @@ public:
 
     bool service_renegotiation_supported{false};
 
+    bool ChargerStartStop{true};
+
 private:
     // NOTE (aw): could be const
     std::array<uint8_t, ID_LENGTH> id{};

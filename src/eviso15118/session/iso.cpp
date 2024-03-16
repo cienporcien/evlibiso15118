@@ -181,9 +181,18 @@ TimePoint const& Session::poll() {
                 session::logging::ExiMessageDirection::TO_EV);
 
         if (session_stopped) {
+                        
             connection->close();
             session_stopped = false; // reset
-            ctx.feedback.signal(session::feedback::Signal::DLINK_TERMINATE);
+
+        }
+    }
+    else{ //RDB shut down after no response and session_stopped
+       if (session_stopped) {
+            
+            connection->close();
+            session_stopped = false; // reset
+            //Inform the car simulator that the charge is over.
         }
     }
 

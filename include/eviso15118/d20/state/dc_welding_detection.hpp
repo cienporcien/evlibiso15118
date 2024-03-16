@@ -12,6 +12,7 @@ struct DC_WeldingDetection : public FsmSimpleState {
     void enter() final;
 
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
+    message_20::DC_WeldingDetectionRequest setup_request(const d20::Session &session);
 
 private:
     float present_voltage{0};

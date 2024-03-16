@@ -22,9 +22,33 @@ template <> void convert(const struct iso20_SessionStopReqType& in, SessionStopR
     }
 }
 
+//RBL Add the conversion for the response from the EVCC
+template <> void convert(const struct iso20_SessionStopResType& in, SessionStopResponse& out) {
+
+    cb_convert_enum(in.ResponseCode, out.response_code);
+    
+    convert(in.Header, out.header);
+   
+}
+
+//RDB Add conversion for the request to convert to exi
+template <> void convert(const SessionStopRequest& in, iso20_SessionStopReqType& out) {
+    init_iso20_SessionStopReqType(&out);
+
+    //RDB TODO Handle the various options in the request
+
+    convert(in.header, out.Header);
+
+}
+
 template <> void insert_type(VariantAccess& va, const struct iso20_SessionStopReqType& in) {
     va.insert_type<SessionStopRequest>(in);
 }
+
+//RBL handle the response
+template <> void insert_type(VariantAccess& va, const struct iso20_SessionStopResType& in) {
+    va.insert_type<SessionStopResponse>(in);
+};
 
 template <> void convert(const SessionStopResponse& in, struct iso20_SessionStopResType& out) {
     init_iso20_SessionStopResType(&out);
@@ -43,7 +67,24 @@ template <> int serialize_to_exi(const SessionStopResponse& in, exi_bitstream_t&
     return encode_iso20_exiDocument(&out, &doc);
 }
 
+//RDB output the request
+template <> int serialize_to_exi(const SessionStopRequest& in, exi_bitstream_t& out) {
+    iso20_exiDocument doc;
+    init_iso20_exiDocument(&doc);
+
+    CB_SET_USED(doc.SessionStopReq);
+
+    convert(in, doc.SessionStopReq);
+
+    return encode_iso20_exiDocument(&out, &doc);
+}
+
 template <> size_t serialize(const SessionStopResponse& in, const io::StreamOutputView& out) {
+    return serialize_helper(in, out);
+}
+
+//RDB output the request
+template <> size_t serialize(const SessionStopRequest& in, const io::StreamOutputView& out) {
     return serialize_helper(in, out);
 }
 
