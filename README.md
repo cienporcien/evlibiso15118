@@ -20,6 +20,13 @@ SDP had to be rewritten, and the state flow is slightly different, since the EV 
 
 A new EVerest module, CbexiEV has been written as well to interface with the EVerest car simulator.
 
+Following this, the functionality for Automatic Connection Device Pantograph (ACDP) was added in the branch evlibiso15118_with_ACDP.
+It is intended that ACDP be merged into the main library since ACDP is a relatively small extension to -20 DC charging.
+ACDP requires a different SDP procedure, as well as adding a few messages for aligning the vehicle and for connecting the ACD.
+
+Following this, support for 15118-2 and DIN are intended to be added.
+
+
 Author Roger Bedell, based on EVerest/libiso15118.
 
 

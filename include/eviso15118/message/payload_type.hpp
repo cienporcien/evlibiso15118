@@ -25,6 +25,7 @@ template <typename T> struct PayloadTypeTrait;
 
 CREATE_TYPE_TRAIT(SupportedAppProtocolRequest, SAP);
 CREATE_TYPE_TRAIT(SessionSetupRequest, Part20Main);
+CREATE_TYPE_TRAIT(ACDP_VehiclePositioningRequest, Part20ACDP);
 CREATE_TYPE_TRAIT(AuthorizationSetupRequest, Part20Main);
 CREATE_TYPE_TRAIT(AuthorizationRequest, Part20Main);
 CREATE_TYPE_TRAIT(ServiceDiscoveryRequest, Part20Main);
@@ -32,15 +33,18 @@ CREATE_TYPE_TRAIT(ServiceDetailRequest, Part20Main);
 CREATE_TYPE_TRAIT(ServiceSelectionRequest, Part20Main);
 CREATE_TYPE_TRAIT(DC_ChargeParameterDiscoveryRequest, Part20DC);
 CREATE_TYPE_TRAIT(ScheduleExchangeRequest, Part20Main);
+CREATE_TYPE_TRAIT(ACDP_ConnectRequest, Part20ACDP);
 CREATE_TYPE_TRAIT(DC_CableCheckRequest, Part20DC);
 CREATE_TYPE_TRAIT(DC_PreChargeRequest, Part20DC);
 CREATE_TYPE_TRAIT(PowerDeliveryRequest, Part20Main);
 CREATE_TYPE_TRAIT(DC_ChargeLoopRequest, Part20DC);
+CREATE_TYPE_TRAIT(ACDP_DisconnectRequest, Part20ACDP);
 CREATE_TYPE_TRAIT(DC_WeldingDetectionRequest, Part20DC);
 CREATE_TYPE_TRAIT(SessionStopRequest, Part20Main);
 
 CREATE_TYPE_TRAIT(SupportedAppProtocolResponse, SAP);
 CREATE_TYPE_TRAIT(SessionSetupResponse, Part20Main);
+CREATE_TYPE_TRAIT(ACDP_VehiclePositioningResponse, Part20ACDP);
 CREATE_TYPE_TRAIT(AuthorizationSetupResponse, Part20Main);
 CREATE_TYPE_TRAIT(AuthorizationResponse, Part20Main);
 CREATE_TYPE_TRAIT(ServiceDiscoveryResponse, Part20Main);
@@ -48,12 +52,15 @@ CREATE_TYPE_TRAIT(ServiceDetailResponse, Part20Main);
 CREATE_TYPE_TRAIT(ServiceSelectionResponse, Part20Main);
 CREATE_TYPE_TRAIT(DC_ChargeParameterDiscoveryResponse, Part20DC);
 CREATE_TYPE_TRAIT(ScheduleExchangeResponse, Part20Main);
+CREATE_TYPE_TRAIT(ACDP_ConnectResponse, Part20ACDP);
 CREATE_TYPE_TRAIT(DC_CableCheckResponse, Part20DC);
 CREATE_TYPE_TRAIT(DC_PreChargeResponse, Part20DC);
 CREATE_TYPE_TRAIT(PowerDeliveryResponse, Part20Main);
 CREATE_TYPE_TRAIT(DC_ChargeLoopResponse, Part20DC);
+CREATE_TYPE_TRAIT(ACDP_DisconnectResponse, Part20ACDP);
 CREATE_TYPE_TRAIT(DC_WeldingDetectionResponse, Part20DC);
 CREATE_TYPE_TRAIT(SessionStopResponse, Part20Main);
+
 
 
 #ifdef CREATE_TYPE_TRAIT_PUSHED

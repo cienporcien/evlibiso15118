@@ -9,7 +9,6 @@
 
 #include <cstring>
 
-
 #include <eviso15118/io/connection_plain.hpp>
 #include <eviso15118/io/connection_ssl.hpp>
 #include <eviso15118/session/iso.hpp>
@@ -60,11 +59,21 @@ void TbdController::send_control_event(const d20::ControlEvent &event)
             return;
         }
         else{
-            //Get the value of the variant
+            // Get the value of the variant
             d20::start_stop_charging ssval = std::get<d20::StartStopCharging>(event);
-            if (ssval == d20::start_stop_charging::START_CHARGING){
-                //RDB TODO what about the timeout waiting for the SDP response? Start up a timer.
-                this->sdp_server.send_request();
+            if (ssval == d20::start_stop_charging::START_CHARGING)
+            {
+                // RDB TODO what about the timeout waiting for the SDP response? Start up a timer.
+                // Check to see if we are using wireless.
+                // RDB Check here if the interface is wireless, and handle SDP differently if so.
+                char protocol[IFNAMSIZ] = {0};
+                bool IsWireless = true; // false; //invert logic for testing on a wired if
+                if (check_wireless(config.interface_name.c_str(), protocol) == 1)
+                {
+                    IsWireless = false; // true;
+                }
+
+                this->sdp_server.send_request(IsWireless);
                 return;
             }
             else{ //This should not happen for PAUSE and STOP, so ignore
@@ -138,6 +147,27 @@ void TbdController::set_SAP_IConnection(std::unique_ptr<io::IConnection> connect
 void TbdController::set_PollManager(io::PollManager pm) {
     //RDB we need to keep the event_fd that was created in the constructor of PollManager in this instance
     poll_manager.copy_pm(pm);
+}
+
+int TbdController::check_wireless(const char* ifname, char* protocol) {
+  int sock = -1;
+  struct iwreq pwrq;
+  memset(&pwrq, 0, sizeof(pwrq));
+  strncpy(pwrq.ifr_name, ifname, IFNAMSIZ);
+
+  if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    perror("socket");
+    return 0;
+  }
+
+  if (ioctl(sock, SIOCGIWNAME, &pwrq) != -1) {
+    if (protocol) strncpy(protocol, pwrq.u.name, IFNAMSIZ);
+    close(sock);
+    return 1;
+  }
+
+  close(sock);
+  return 0;
 }
 
 } // namespace eviso15118

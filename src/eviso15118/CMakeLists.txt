@@ -49,6 +49,7 @@ target_sources(eviso15118
 
         d20/state/supported_app_protocol.cpp
         d20/state/session_setup.cpp
+        d20/state/acdp_vehicle_positioning.cpp
         d20/state/authorization_setup.cpp
         d20/state/authorization.cpp
         d20/state/service_discovery.cpp
@@ -56,15 +57,18 @@ target_sources(eviso15118
         d20/state/service_selection.cpp
         d20/state/dc_charge_parameter_discovery.cpp
         d20/state/schedule_exchange.cpp
+        d20/state/acdp_connect.cpp
         d20/state/dc_cable_check.cpp
         d20/state/dc_pre_charge.cpp
         d20/state/power_delivery.cpp
         d20/state/dc_charge_loop.cpp
+        d20/state/acdp_disconnect.cpp
         d20/state/dc_welding_detection.cpp
         d20/state/session_stop.cpp
 
         message/variant.cpp
         message/supported_app_protocol.cpp
+        message/acdp_vehicle_positioning
         message/session_setup.cpp
         message/common.cpp
         message/authorization_setup.cpp
@@ -74,9 +78,11 @@ target_sources(eviso15118
         message/service_selection.cpp
         message/dc_charge_parameter_discovery.cpp
         message/schedule_exchange.cpp
+        message/acdp_connect.cpp
         message/dc_cable_check.cpp
         message/dc_pre_charge.cpp
         message/power_delivery.cpp
+        message/acdp_disconnect.cpp
         message/dc_charge_loop.cpp
         message/dc_welding_detection.cpp
         message/session_stop.cpp

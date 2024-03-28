@@ -57,21 +57,30 @@ FsmSimpleState::HandleEventReturnType SupportedAppProtocol::handle_event(Allocat
         //  Then, when the response arrives back from the EVCC, we can react
         // and move on to the next state.
         // RDB TODO We should use the supported protocols from the module config.
+
+        // RDB Supports only ISO15118-20 ACDP (in the future OppCharge also). ACDP is selected over OppCharge if there is a choice.
+        // [V2G20-4107] If an EVCC supports the service ACDP and intends to offer it for this V2G
+        // communication session, it shall add an AppProtocol element to the
+        // supportedAppProtocolReq with ProtocolNamespace set to "urn:iso:std:iso:15118:-
+        // 20:ACDP", VersionNumberMajor set to "1" and VersionNumberMinor set to "0"
+        // RDB - note that ACDP is currently only DC_ACDP and maybe DC_ACDP_BPT, so requesting
+        // ACDP implies DC charging as well.
         message_20::SupportedAppProtocolRequest req;
 
         auto &item_out2 = req.app_protocol.emplace_back();
-        item_out2.protocol_namespace = "urn:iso:std:iso:15118:-20:DC";
+        item_out2.protocol_namespace = "urn:iso:std:iso:15118:-20:ACDP";
         item_out2.version_number_major = 1;
         item_out2.version_number_minor = 0;
-        item_out2.schema_id = 2;
-        item_out2.priority = 2;
+        item_out2.schema_id = 1;
+        item_out2.priority = 1;
 
-        auto &item_out = req.app_protocol.emplace_back();
-        item_out.protocol_namespace = "urn:iso:15118:2:2013:MsgDef";
-        item_out.version_number_major = 2;
-        item_out.version_number_minor = 0;
-        item_out.schema_id = 1;
-        item_out.priority = 1;
+        // RDB Future, add OppCharge
+        //  auto &item_out = req.app_protocol.emplace_back();
+        //  item_out.protocol_namespace = "urn:iso:15118:2:2013:MsgDef";
+        //  item_out.version_number_major = 2;
+        //  item_out.version_number_minor = 0;
+        //  item_out.schema_id = 1;
+        //  item_out.priority = 1;
 
         // Send it.
         ctx.request(req);

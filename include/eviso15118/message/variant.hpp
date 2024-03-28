@@ -51,3 +51,5 @@ private:
     std::string error;
 };
 } // namespace eviso15118::message_20
+
+

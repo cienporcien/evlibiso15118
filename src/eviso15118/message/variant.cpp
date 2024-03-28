@@ -11,6 +11,7 @@
 #include <exi/cb/appHand_Decoder.h>
 #include <exi/cb/iso20_CommonMessages_Decoder.h>
 #include <exi/cb/iso20_DC_Decoder.h>
+#include <exi/cb/iso20_ACDP_Decoder.h>
 
 using PayloadType = eviso15118::io::v2gtp::PayloadType;
 
@@ -91,6 +92,54 @@ static void handle_dc(VariantAccess& va) {
     }
 }
 
+static void handle_acdp(VariantAccess& va) {
+    iso20_acdp_exiDocument doc;
+
+    const auto decode_status = decode_iso20_acdp_exiDocument(&va.input_stream, &doc);
+
+    if (decode_status != 0) {
+        va.error = "decode_iso20_acdp_exiDocument failed with " + std::to_string(decode_status);
+        return;
+    }
+
+    if (doc.ACDP_VehiclePositioningRes_isUsed) {
+        insert_type(va, doc.ACDP_VehiclePositioningRes);
+    } else if (doc.ACDP_ConnectRes_isUsed) {
+        insert_type(va, doc.ACDP_ConnectRes);
+    } else if (doc.ACDP_DisconnectRes_isUsed) {
+        // RDB this is a little tricky here. The type of doc.ACDP_DisconnectRes is exactly the same as doc.ACDP_ConnectRes
+        //     struct iso20_acdp_exiDocument {
+        // union {
+        //     struct iso20_acdp_ACDP_VehiclePositioningReqType ACDP_VehiclePositioningReq;
+        //     struct iso20_acdp_ACDP_VehiclePositioningResType ACDP_VehiclePositioningRes;
+        //     struct iso20_acdp_ACDP_ConnectReqType ACDP_ConnectReq;
+        //     struct iso20_acdp_ACDP_ConnectResType ACDP_ConnectRes;
+        //     struct iso20_acdp_ACDP_ConnectReqType ACDP_DisconnectReq;
+        //     struct iso20_acdp_ACDP_ConnectResType ACDP_DisconnectRes;
+        // This means that it is impossible to differentiate between the two based on the type (which is what this does)
+        // e.g.
+        // template <> void insert_type(VariantAccess& va, const struct iso20_acdp_ACDP_ConnectReqType& in) {
+        //     va.insert_type<ACDP_DisconnectRequest>(in);
+        // } is the same as:
+        // template <> void insert_type(VariantAccess& va, const struct iso20_acdp_ACDP_ConnectReqType& in) {
+        //     va.insert_type<ACDP_ConnectRequest>(in);
+        // }
+        // and we get a duplicate function error when trying to link. 
+
+        // To fix this, create a new type called 
+        //struct iso20_acdp_ACDP_DisconnectResType and copy everything to it and try again.
+        struct iso20_acdp_ACDP_DisconnectResType DT;
+        DT.EVSEElectricalChargingDeviceStatus = doc.ACDP_DisconnectRes.EVSEElectricalChargingDeviceStatus;
+        DT.EVSEMechanicalChargingDeviceStatus = doc.ACDP_DisconnectRes.EVSEMechanicalChargingDeviceStatus;
+        DT.EVSEProcessing = doc.ACDP_DisconnectRes.EVSEProcessing;
+        DT.Header = doc.ACDP_DisconnectRes.Header;
+        DT.ResponseCode = doc.ACDP_DisconnectRes.ResponseCode;
+        insert_type(va, DT);
+    } else {
+        va.error = "chosen message type unhandled";
+    }
+}
+
 Variant::Variant(io::v2gtp::PayloadType payload_type, const io::StreamInputView& buffer_view) {
 
     VariantAccess va{
@@ -103,6 +152,8 @@ Variant::Variant(io::v2gtp::PayloadType payload_type, const io::StreamInputView&
         handle_main(va);
     } else if (payload_type == PayloadType::Part20DC) {
         handle_dc(va);
+    } else if (payload_type == PayloadType::Part20ACDP) {
+        handle_acdp(va);        
     } else {
         logf("Unknown type\n");
     }

@@ -2,7 +2,7 @@
 // Copyright 2023 Pionix GmbH and Contributors to EVereqt
 #include <algorithm>
 
-#include <eviso15118/d20/state/authorization_setup.hpp>
+#include <eviso15118/d20/state/acdp_vehicle_positioning.hpp>
 #include <eviso15118/d20/state/session_setup.hpp>
 
 #include <eviso15118/detail/d20/context_helper.hpp>
@@ -76,7 +76,7 @@ FsmSimpleState::HandleEventReturnType SessionSetup::handle_event(AllocatorType& 
 
         //ctx.respond(req);
 
-        return sa.create_simple<AuthorizationSetup>(ctx);
+        return sa.create_simple<ACDP_VehiclePositioning>(ctx);
 
 
     } else {
