@@ -103,36 +103,61 @@ void TbdController::setup_session(const std::vector<message_20::Authorization>& 
     session_config.cert_install_service = cert_install_service;
 }
 
-//RDB This needs to be changed for the EV side. Since the EV is initiating the SDP process, in order to
-//respond to a start charging message from the ECU, it needs to initialize the first session before the first
-//sdp response comes back so we have a functional state machine. This means we don't know whether or not the EVSE supports TLS until then. 
-//Or, we can handle the SDP request process separately from the state machine (session), and set up the state machine here on the SDP reply, leaving
-//things more or less the same. This is what I did.
-void TbdController::handle_sdp_server_input() {
+// RDB This needs to be changed for the EV side. Since the EV is initiating the SDP process, in order to
+// respond to a start charging message from the ECU, it needs to initialize the first session before the first
+// sdp response comes back so we have a functional state machine. This means we don't know whether or not the EVSE supports TLS until then.
+// Or, we can handle the SDP request process separately from the state machine (session), and set up the state machine here on the SDP reply, leaving
+// things more or less the same. This is what I did.
+void TbdController::handle_sdp_server_input()
+{
     auto response = sdp_server.get_peer_response();
 
-    //memcpy(end_point.address, &response.address.sin6_addr, sizeof(&response.address.sin6_addr));
-    std::copy(std::begin(response.address.sin6_addr.__in6_u.__u6_addr16), std::end(response.address.sin6_addr.__in6_u.__u6_addr16), std::begin(end_point.address));
-    end_point.port=response.address.sin6_port;
-    
+    // RDB If using wireless SDP, we need to examine the diag_status of the response. If it is ongoing, we need to send another
+    // sdp request after 250ms
+    if (response.diag_status == io::v2gtp::DiagStatus::finished_with_EVSEID)
+    {
+        // memcpy(end_point.address, &response.address.sin6_addr, sizeof(&response.address.sin6_addr));
+        std::copy(std::begin(response.address.sin6_addr.__in6_u.__u6_addr16), std::end(response.address.sin6_addr.__in6_u.__u6_addr16), std::begin(end_point.address));
+        end_point.port = response.address.sin6_port;
 
-    // RDB on the ev side, we connect with the IP, Port, and security specified in the SDP response. So, we need to pass in the address and port.  
-    auto connection = [this](bool secure_connection) -> std::unique_ptr<io::IConnection> {
-        if (secure_connection) {
-            return std::make_unique<io::ConnectionSSL>(poll_manager, config.interface_name, config.ssl, end_point);
-        } else {
-            return std::make_unique<io::ConnectionPlain>(poll_manager, config.interface_name, end_point );
+        // RDB on the ev side, we connect with the IP, Port, and security specified in the SDP response. So, we need to pass in the address and port.
+        auto connection = [this](bool secure_connection) -> std::unique_ptr<io::IConnection>
+        {
+            if (secure_connection)
+            {
+                return std::make_unique<io::ConnectionSSL>(poll_manager, config.interface_name, config.ssl, end_point);
+            }
+            else
+            {
+                return std::make_unique<io::ConnectionPlain>(poll_manager, config.interface_name, end_point);
+            }
+        }(response.security == io::v2gtp::Security::TLS);
+
+        const auto ipv6_endpoint = connection->get_public_endpoint();
+
+        // Todo(sl): Check if session_config is empty
+        const auto &new_session = sessions.emplace_back(std::move(connection), session_config, callbacks);
+
+        // RDB don't reply, instead go to the first state (SupportedAppRequest) by sending a control event
+        this->send_control_event(d20::StartStopCharging(d20::start_stop_charging::START_CHARGING));
+    }
+    else if (response.diag_status == io::v2gtp::DiagStatus::ongoing)
+    {
+        // Wait 250ms and send another - RDB TODO it would be nice to have the IsWireless saved so we don't need to check again...
+        usleep(250000);
+
+        char protocol[IFNAMSIZ] = {0};
+        bool IsWireless = true; // false; //invert logic for testing on a wired if
+        if (check_wireless(config.interface_name.c_str(), protocol) == 1)
+        {
+            IsWireless = false; // true;
         }
-    }(response.security == io::v2gtp::Security::TLS);
 
-    const auto ipv6_endpoint = connection->get_public_endpoint();
-
-    // Todo(sl): Check if session_config is empty
-    const auto& new_session = sessions.emplace_back(std::move(connection), session_config, callbacks);
-
-
-    //RDB don't reply, instead go to the first state (SupportedAppRequest) by sending a control event
-    this->send_control_event(d20::StartStopCharging(d20::start_stop_charging::START_CHARGING));
+        this->sdp_server.send_request(IsWireless);
+    }
+    else
+    { // RBD TODO what to do with the other two possibilies?
+    }
 }
 
 // RBD allow to pass in the IConnection made by SAP
