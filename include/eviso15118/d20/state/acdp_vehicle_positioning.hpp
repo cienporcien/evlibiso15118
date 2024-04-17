@@ -14,7 +14,7 @@ struct ACDP_VehiclePositioning : public FsmSimpleState {
 
     HandleEventReturnType handle_event(AllocatorType&, FsmEvent) final;
 
-    message_20::ACDP_VehiclePositioningRequest setup_request(const d20::Session &session);
+    message_20::ACDP_VehiclePositioningRequest setup_request(const d20::Session &session, const bool ev_mobility_status);
 
 private:
     bool vehicle_positioning_initiated{false};

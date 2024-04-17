@@ -13,11 +13,13 @@ namespace eviso15118::d20::state {
 
 
 //RDB - setup the request message to avoid duplication
-message_20::ACDP_VehiclePositioningRequest ACDP_VehiclePositioning::setup_request(const d20::Session &session)
+message_20::ACDP_VehiclePositioningRequest ACDP_VehiclePositioning::setup_request(const d20::Session &session, const bool ev_mobility_status)
 {
     message_20::ACDP_VehiclePositioningRequest req;
     setup_header(req.header,session);
     message_20::RequestCode request_code  = message_20::RequestCode::OK;
+    req.EVPositioningSupport = false;
+    req.EVMobilityStatus = ev_mobility_status;
     return request_with_code(req, request_code);
 }
 
@@ -25,9 +27,7 @@ void ACDP_VehiclePositioning::enter() {
     ctx.log.enter_state("ACDP_VehiclePositioning");
 
         //Prepare and send the request
-    auto req = ACDP_VehiclePositioning::setup_request(ctx.session);
-    req.EVMobilityStatus = 0;
-    req.EVPositioningSupport = 0;
+    auto req = ACDP_VehiclePositioning::setup_request(ctx.session, false);
     ctx.request(req);
 }
 
@@ -47,10 +47,24 @@ FsmSimpleState::HandleEventReturnType ACDP_VehiclePositioning::handle_event(Allo
         if (res->processing == message_20::Processing::Ongoing)
         {
             // Prepare and send the request
+            // We get a lot of information here that can be used to indicate to the
+            // driver or the vehicle what is happening and to decide whether to immobilize the vehicle.
+            bool vehicle_immobilized = false;
+            if(res->EVInChargePosition == true)
+            {
+                //We are in charge position and can immobilize.
+                //RDB TODO - needs to be integrated with the vehicle simulator.
+                vehicle_immobilized = true;
+            }
+
+            //Send the position, window, EVInChargePosition to a display device.
+           
+
+
             // Wait a little bit to slow things down otherwise too many messages.
             std::this_thread::sleep_for(std::chrono::milliseconds(250));
             
-            const auto req = ACDP_VehiclePositioning::setup_request(ctx.session);
+            const auto req = ACDP_VehiclePositioning::setup_request(ctx.session, vehicle_immobilized);
             ctx.request(req);
             return sa.HANDLED_INTERNALLY;
         }
