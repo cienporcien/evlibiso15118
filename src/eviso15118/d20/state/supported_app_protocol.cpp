@@ -58,17 +58,17 @@ FsmSimpleState::HandleEventReturnType SupportedAppProtocol::handle_event(Allocat
         // and move on to the next state.
         // RDB TODO We should use the supported protocols from the module config.
 
-        // RDB Supports only ISO15118-20 ACDP (in the future OppCharge also). ACDP is selected over OppCharge if there is a choice.
-        // [V2G20-4107] If an EVCC supports the service ACDP and intends to offer it for this V2G
+        // RDB Supports only ISO15118-20 ACDS (in the future OppCharge also). ACDS is selected over OppCharge if there is a choice.
+        // [V2G20-4107] If an EVCC supports the service ACDS and intends to offer it for this V2G
         // communication session, it shall add an AppProtocol element to the
         // supportedAppProtocolReq with ProtocolNamespace set to "urn:iso:std:iso:15118:-
-        // 20:ACDP", VersionNumberMajor set to "1" and VersionNumberMinor set to "0"
-        // RDB - note that ACDP is currently only DC_ACDP and maybe DC_ACDP_BPT, so requesting
-        // ACDP implies DC charging as well.
+        // 20:ACDS", VersionNumberMajor set to "1" and VersionNumberMinor set to "0"
+        // RDB - note that ACDS is currently only DC_ACDS and maybe DC_ACDS_BPT, so requesting
+        // ACDS implies DC charging as well.
         message_20::SupportedAppProtocolRequest req;
 
         auto &item_out2 = req.app_protocol.emplace_back();
-        item_out2.protocol_namespace = "urn:iso:std:iso:15118:-20:ACDP";
+        item_out2.protocol_namespace = "urn:iso:std:iso:15118:-20:ACDS";
         item_out2.version_number_major = 1;
         item_out2.version_number_minor = 0;
         item_out2.schema_id = 1;

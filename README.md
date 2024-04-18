@@ -1,13 +1,13 @@
-ISO 15118-20 EV library suite with ACDP
+ISO 15118-20 EV library suite with ACDS
 =======================
 
-Currently, this is a proof of concept library. It runs against libiso15118 dash-20-poc-acdp branch. (iso15118-20 only).
+Currently, this is a proof of concept library. It runs against libiso15118 dash-20-poc-acds branch. (iso15118-20 only).
 
 
 This is an implementation of the EV side of ISO 15118-20 using cbexigen and the new framework built on top of cbexigen
 generated EXI source code.
 It is intended to replace Josev, since Josev is Python based, and has the issue with the EXI jar not being open source, so it could not
-be changed or adapted to WPS or ACDP. As well, cbexigen is very transparent and easy to work with, and uses the Apache 2.0
+be changed or adapted to WPS or ACDS. As well, cbexigen is very transparent and easy to work with, and uses the Apache 2.0
 license.
 
 The EV side is sort of a mirror of the EVSE side, but is the master of the communication sequence instead of the slave.
@@ -20,7 +20,7 @@ SDP had to be rewritten, and the state flow is slightly different, since the EV 
 
 A new EVerest module, CbexiEV has been written as well to interface with the EVerest car simulator.
 
-In this ACDP branch, the functionality for Automatic Connection Device Pantograph (ACDP) was added in the branch evlibiso15118_with_ACDP.
+In this ACDS branch, the functionality for Automatic Connection Device Pantograph (ACDS) was added in the branch evlibiso15118_with_ACDS.
 SDP for Wireless was also added.
 
 

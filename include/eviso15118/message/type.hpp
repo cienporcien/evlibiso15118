@@ -12,8 +12,8 @@ enum class Type {
     SupportedAppProtocolRes,
     SessionSetupReq,
     SessionSetupRes,
-    ACDP_VehiclePositioningReq,
-    ACDP_VehiclePositioningRes,
+    ACDS_VehiclePositioningReq,
+    ACDS_VehiclePositioningRes,
     AuthorizationSetupReq,
     AuthorizationSetupRes,
     AuthorizationReq,
@@ -28,8 +28,8 @@ enum class Type {
     DC_ChargeParameterDiscoveryRes,
     ScheduleExchangeReq,
     ScheduleExchangeRes,
-    ACDP_ConnectReq,
-    ACDP_ConnectRes,
+    ACDS_ConnectReq,
+    ACDS_ConnectRes,
     DC_CableCheckReq,
     DC_CableCheckRes,
     DC_PreChargeReq,
@@ -38,8 +38,8 @@ enum class Type {
     PowerDeliveryRes,
     DC_ChargeLoopReq,
     DC_ChargeLoopRes,
-    ACDP_DisconnectReq,
-    ACDP_DisconnectRes,
+    ACDS_DisconnectReq,
+    ACDS_DisconnectRes,
     DC_WeldingDetectionReq,
     DC_WeldingDetectionRes,
     SessionStopReq,
@@ -69,7 +69,7 @@ template <typename MessageType> size_t serialize(const MessageType&, const io::S
 
 CREATE_TYPE_TRAIT(SupportedAppProtocolRequest, SupportedAppProtocolReq);
 CREATE_TYPE_TRAIT(SessionSetupRequest, SessionSetupReq);
-CREATE_TYPE_TRAIT(ACDP_VehiclePositioningRequest, ACDP_VehiclePositioningReq);
+CREATE_TYPE_TRAIT(ACDS_VehiclePositioningRequest, ACDS_VehiclePositioningReq);
 CREATE_TYPE_TRAIT(AuthorizationSetupRequest, AuthorizationSetupReq);
 CREATE_TYPE_TRAIT(AuthorizationRequest, AuthorizationReq);
 CREATE_TYPE_TRAIT(ServiceDiscoveryRequest, ServiceDiscoveryReq);
@@ -77,11 +77,11 @@ CREATE_TYPE_TRAIT(ServiceDetailRequest, ServiceDetailReq);
 CREATE_TYPE_TRAIT(ServiceSelectionRequest, ServiceSelectionReq);
 CREATE_TYPE_TRAIT(DC_ChargeParameterDiscoveryRequest, DC_ChargeParameterDiscoveryReq);
 CREATE_TYPE_TRAIT(ScheduleExchangeRequest, ScheduleExchangeReq);
-CREATE_TYPE_TRAIT(ACDP_ConnectRequest, ACDP_ConnectReq);
+CREATE_TYPE_TRAIT(ACDS_ConnectRequest, ACDS_ConnectReq);
 CREATE_TYPE_TRAIT(DC_CableCheckRequest, DC_CableCheckReq);
 CREATE_TYPE_TRAIT(DC_PreChargeRequest, DC_PreChargeReq);
 CREATE_TYPE_TRAIT(PowerDeliveryRequest, PowerDeliveryReq);
-CREATE_TYPE_TRAIT(ACDP_DisconnectRequest, ACDP_DisconnectReq);
+CREATE_TYPE_TRAIT(ACDS_DisconnectRequest, ACDS_DisconnectReq);
 CREATE_TYPE_TRAIT(DC_ChargeLoopRequest, DC_ChargeLoopReq);
 CREATE_TYPE_TRAIT(DC_WeldingDetectionRequest, DC_WeldingDetectionReq);
 CREATE_TYPE_TRAIT(SessionStopRequest, SessionStopReq);
@@ -90,7 +90,7 @@ CREATE_TYPE_TRAIT(SessionStopRequest, SessionStopReq);
 //RBL Add the type traits for the incoming Responses from the EVSE
 CREATE_TYPE_TRAIT(SupportedAppProtocolResponse, SupportedAppProtocolRes);
 CREATE_TYPE_TRAIT(SessionSetupResponse, SessionSetupRes);
-CREATE_TYPE_TRAIT(ACDP_VehiclePositioningResponse, ACDP_VehiclePositioningRes);
+CREATE_TYPE_TRAIT(ACDS_VehiclePositioningResponse, ACDS_VehiclePositioningRes);
 CREATE_TYPE_TRAIT(AuthorizationSetupResponse, AuthorizationSetupRes);
 CREATE_TYPE_TRAIT(AuthorizationResponse, AuthorizationRes);
 CREATE_TYPE_TRAIT(ServiceDiscoveryResponse, ServiceDiscoveryRes);
@@ -98,12 +98,12 @@ CREATE_TYPE_TRAIT(ServiceDetailResponse, ServiceDetailRes);
 CREATE_TYPE_TRAIT(ServiceSelectionResponse, ServiceSelectionRes);
 CREATE_TYPE_TRAIT(DC_ChargeParameterDiscoveryResponse, DC_ChargeParameterDiscoveryRes);
 CREATE_TYPE_TRAIT(ScheduleExchangeResponse, ScheduleExchangeRes);
-CREATE_TYPE_TRAIT(ACDP_ConnectResponse, ACDP_ConnectRes);
+CREATE_TYPE_TRAIT(ACDS_ConnectResponse, ACDS_ConnectRes);
 CREATE_TYPE_TRAIT(DC_CableCheckResponse, DC_CableCheckRes);
 CREATE_TYPE_TRAIT(DC_PreChargeResponse, DC_PreChargeRes);
 CREATE_TYPE_TRAIT(PowerDeliveryResponse, PowerDeliveryRes);
 CREATE_TYPE_TRAIT(DC_ChargeLoopResponse, DC_ChargeLoopRes);
-CREATE_TYPE_TRAIT(ACDP_DisconnectResponse, ACDP_DisconnectRes);
+CREATE_TYPE_TRAIT(ACDS_DisconnectResponse, ACDS_DisconnectRes);
 CREATE_TYPE_TRAIT(DC_WeldingDetectionResponse, DC_WeldingDetectionRes);
 CREATE_TYPE_TRAIT(SessionStopResponse, SessionStopRes);
 
