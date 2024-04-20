@@ -227,6 +227,7 @@ void SdpServer::send_request(const bool IsWireless)
         uint8_t *sdp_request = v2g_packet + 8;
 
         // FIXME (aw): which values to take here?
+        //RDB TODO security needs to come from config.
         sdp_request[0] = static_cast<std::underlying_type_t<v2gtp::Security>>(request.security);
         sdp_request[1] =
             static_cast<std::underlying_type_t<v2gtp::TransportProtocol>>(request.transport_protocol);
@@ -248,8 +249,8 @@ void SdpServer::send_request(const bool IsWireless)
         request.address = {AF_INET6, htons(15118)};
         inet_pton(AF_INET6, "ff02::1", &request.address.sin6_addr);
 
-        //RDB TODO p2ps, EVID, EVSEID, and coupling type should come from config or ev
-        request.security = v2gtp::Security::NO_TRANSPORT_SECURITY;
+        //RDB TODO p2ps, EVID, EVSEID, and coupling type should come from config or ev, also security
+        request.security = v2gtp::Security::TLS;
         request.transport_protocol = v2gtp::TransportProtocol::TCP;
         request.p2ps_ppd = v2gtp::P2PS_PPD::PPD_on_Infrastructure;
         request.coupling_type = v2gtp::CouplingType::EN50696_Annex_A_2_Inverted_Pantograph_Cross;

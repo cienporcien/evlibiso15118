@@ -6,6 +6,20 @@
 #include <cstring>
 #include <filesystem>
 #include <thread>
+#include <net/if.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <errno.h>
+
+
 
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/debug.h"
@@ -96,11 +110,31 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
     psa_crypto_init();
 #endif
 
+    // //Convert the address and port to a sockaddr_in6
+    // sockaddr_in6 address;
+    // address.sin6_family=AF_INET6;
+    // memcpy(&address.sin6_addr, end_point.address, sizeof(&address.sin6_addr));
+    // address.sin6_port=end_point.port;
+
+    // const auto address_name = sockaddr_in6_to_name(address);
+
+    // if (not address_name) {
+    //     const auto msg =
+    //         "Failed to determine string representation of ipv6 socket address for interface " + interface_name;
+    //     log_and_throw(msg.c_str());
+    // }
+
+  // setup end point information - on EV side, this was given in the SDP response.
     //Convert the address and port to a sockaddr_in6
     sockaddr_in6 address;
+    bzero((char *) &address, sizeof(address));
     address.sin6_family=AF_INET6;
-    memcpy(&address.sin6_addr, end_point.address, sizeof(&address.sin6_addr));
+    //copy was suggested instead of memcpy
+    std::copy(std::begin(end_point.address), std::end(end_point.address), std::begin(address.sin6_addr.__in6_u.__u6_addr16));
+    //Port is already in reverse, don't need to switch bytes.
     address.sin6_port=end_point.port;
+    //need the scope_id of the interface name.
+    address.sin6_scope_id=if_nametoindex(interface_name.c_str());
 
     const auto address_name = sockaddr_in6_to_name(address);
 
@@ -111,7 +145,7 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
     }
 
     //
-    // mbedtls specifica
+    // mbedtls specification
     //
 
     // initialize pseudo random number generator
@@ -125,15 +159,18 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
     // load certificate
     load_certificates(*ssl, ssl_config);
 
-    const auto bind_result = mbedtls_net_bind(&ssl->accepting_net_ctx, address_name.get(),
-                                              std::to_string(end_point.port).c_str(), MBEDTLS_NET_PROTO_TCP);
-    if (bind_result != 0) {
-        log_and_raise_mbed_error("Failed to mbedtls_net_bind()", bind_result);
+    //RDB switch bytes of port, mbedtls is different than connecting plain.
+    uint16_t tport = htobe16(end_point.port);
+    const auto connect_result = mbedtls_net_connect(&ssl->connection_net_ctx, address_name.get(),
+                                              std::to_string(tport).c_str(), MBEDTLS_NET_PROTO_TCP);
+    if (connect_result != 0) {
+        printf("ERRNO= %s\n", strerror(errno));
+        log_and_raise_mbed_error("Failed to mbedtls_net_connect()", connect_result);
     }
 
-    // setup ssl context configuration
+    // setup ssl context configuration on EV we are client.
     const auto ssl_config_result = mbedtls_ssl_config_defaults(
-        &ssl->conf, MBEDTLS_SSL_IS_SERVER, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
+        &ssl->conf, MBEDTLS_SSL_IS_CLIENT , MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
     if (ssl_config_result != 0) {
         log_and_raise_mbed_error("Failed to mbedtls_ssl_config_defaults()", ssl_config_result);
     }
@@ -162,7 +199,10 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
         log_and_raise_mbed_error("Failed to mbedtls_ssl_setup()", ssl_setup_result);
     }
 
-    poll_manager.register_fd(ssl->accepting_net_ctx.fd, [this]() { this->handle_connect(); });
+    this->handle_connect();
+    this->handle_data();
+    //this->handle_connect();
+    //poll_manager.register_fd(ssl->accepting_net_ctx.fd, [this]() { this->handle_connect(); });
 }
 
 ConnectionSSL::~ConnectionSSL() = default;
@@ -215,11 +255,11 @@ ReadResult ConnectionSSL::read(uint8_t* buf, size_t len) {
 }
 
 void ConnectionSSL::handle_connect() {
-    const auto accept_result =
-        mbedtls_net_accept(&ssl->accepting_net_ctx, &ssl->connection_net_ctx, nullptr, 0, nullptr);
-    if (accept_result != 0) {
-        log_and_raise_mbed_error("Failed to mbedtls_net_accept()", accept_result);
-    }
+    // const auto accept_result =
+    //     mbedtls_net_accept(&ssl->accepting_net_ctx, &ssl->connection_net_ctx, nullptr, 0, nullptr);
+    // if (accept_result != 0) {
+    //     log_and_raise_mbed_error("Failed to mbedtls_net_accept()", accept_result);
+    // }
 
     // setup callbacks for communcation
     mbedtls_ssl_set_bio(&ssl->ssl, &ssl->connection_net_ctx, mbedtls_net_send, mbedtls_net_recv, NULL);
@@ -287,5 +327,7 @@ void ConnectionSSL::close() {
 
     mbedtls_ssl_free(&ssl->ssl);
 }
+
+
 
 } // namespace eviso15118::io
