@@ -7,9 +7,9 @@
 #include <eviso15118/detail/cb_exi.hpp>
 #include <eviso15118/message/variant.hpp>
 
-#include <exi/cb/iso20_CommonMessages_Datatypes.h>
-#include <exi/cb/iso20_DC_Datatypes.h>
-#include <exi/cb/iso20_ACDS_Datatypes.h>
+#include <cbv2g/iso_20/iso20_CommonMessages_Datatypes.h>
+#include <cbv2g/iso_20/iso20_DC_Datatypes.h>
+#include <cbv2g/iso_20/iso20_ACDS_Datatypes.h>
 
 namespace eviso15118::message_20 {
 

@@ -6,8 +6,8 @@
 
 #include <eviso15118/detail/variant_access.hpp>
 
-#include <exi/cb/iso20_ACDS_Decoder.h>
-#include <exi/cb/iso20_ACDS_Encoder.h>
+#include <cbv2g/iso_20/iso20_ACDS_Decoder.h>
+#include <cbv2g/iso_20/iso20_ACDS_Encoder.h>
 
 namespace eviso15118::message_20 {
 

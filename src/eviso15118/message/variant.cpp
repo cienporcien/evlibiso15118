@@ -9,9 +9,9 @@
 #include <eviso15118/detail/variant_access.hpp>
 
 #include <exi/cb/appHand_Decoder.h>
-#include <exi/cb/iso20_CommonMessages_Decoder.h>
-#include <exi/cb/iso20_DC_Decoder.h>
-#include <exi/cb/iso20_ACDS_Decoder.h>
+#include <cbv2g/iso_20/iso20_CommonMessages_Decoder.h>
+#include <cbv2g/iso_20/iso20_DC_Decoder.h>
+#include <cbv2g/iso_20/iso20_ACDS_Decoder.h>
 
 using PayloadType = eviso15118::io::v2gtp::PayloadType;
 
