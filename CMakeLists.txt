@@ -17,7 +17,21 @@ true and hence downloading the schema files, YOU accept the ISO Customer \
 Licence Agreement (“Licence Agreement”), clauses 1. ISO’s Copyright, \
 7. Termination, 8. Limitations, and 9. Governing Law." OFF)
 
+option(ISO15118_LINK_CUSTOM_MBEDTLS "\
+Link against a pinned mbedtls library\
+" ON)
 
+# dependencies
+if (NOT DISABLE_EDM)
+    evc_setup_edm()
+    # In EDM mode, we can't install exports (because the dependencies usually do not install their exports)
+    set(EVISO15118_INSTALL OFF)
+else()
+    find_package(fsm REQUIRED)
+    find_package(cbv2g REQUIRED)
+endif()
+
+add_subdirectory(3rd_party)
 add_subdirectory(input)
 add_subdirectory(src)
 

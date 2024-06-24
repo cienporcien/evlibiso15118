@@ -7,7 +7,7 @@
 #include <eviso15118/detail/cb_exi.hpp>
 #include <eviso15118/detail/variant_access.hpp>
 
-#include <exi/cb/appHand_Encoder.h>
+#include <cbv2g/app_handshake/appHand_Encoder.h>
 
 namespace eviso15118::message_20 {
 

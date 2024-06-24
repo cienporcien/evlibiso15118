@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#include <exi/cb/exi_v2gtp.h>
+#include <cbv2g/exi_v2gtp.h>
 
 #include <eviso15118/detail/helper.hpp>
 
