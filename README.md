@@ -30,6 +30,9 @@ Tested on a clean Raspberry Pi 5, 4gb RAM
 sudo apt update
 sudo apt install -y python3-pip git rsync wget cmake doxygen graphviz build-essential clang-tidy cppcheck openjdk-17-jdk npm docker docker-compose libboost-all-dev nodejs libssl-dev libsqlite3-dev clang-format curl rfkill libpcap-dev libevent-dev pkg-config libcap-dev
 
+# The UWBPPD uses libserial - install this (should be in dependencies, but isn't yet)
+sudo apt install libserial-dev
+
 # Create a checkout directory in home
 mkdir checkout
 cd checkout
@@ -71,7 +74,7 @@ cd build
 cmake ..
 # if you have plenty of RAM, make using -j to build faster:
 # make -j$(nproc) install
-# Note: on a 4gb rpi, using all 4 cores causes raspian to crash eventually, so use this instead though it takes much longer:
+# Note: on a 4gb rpi, using all 4 cores causes Raspbian (Raspberry Pi OS) to crash eventually, so use this instead though it takes much longer:
 make install 
 
 
@@ -89,6 +92,37 @@ make install
 # This builds both the EV side and the EVSE side.
 # If all you need is the EV side, then
 
+vscode debugging configuration
+{
+				"name": "CbexiEV",
+				"type": "cppdbg",
+				"request": "launch",
+				"program": "/home/opbrid/checkout/everest_exi_ev/everest-core/build/modules/CbexiEV/CbexiEV",
+				"args": [
+					"--config",
+					"config-sil-EV-ACDP",
+					"--module",
+					"iso15118_car"
+				],
+				"stopAtEntry": false,
+				"cwd": "/home/opbrid/checkout/everest_exi",
+				"environment": [],
+				"externalConsole": false,
+				"MIMode": "gdb",
+				"setupCommands": [
+					{
+						"description": "Enable pretty-printing for gdb",
+						"text": "-enable-pretty-printing",
+						"ignoreFailures": true
+					},
+					{
+						"description": "Set Disassembly Flavor to Intel",
+						"text": "-gdb-set disassembly-flavor intel",
+						"ignoreFailures": true
+					},
+					{ "text": "set output-radix 16" }
+				]
+			}
 
 Author Roger Bedell, based on EVerest/libiso15118.
 
