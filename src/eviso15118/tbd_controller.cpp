@@ -70,7 +70,7 @@ void TbdController::send_control_event(const d20::ControlEvent &event)
                 bool IsWireless = true; // false; //invert logic for testing on a wired if
                 if (check_wireless(config.interface_name.c_str(), protocol) == 1)
                 {
-                    IsWireless = false; // true;
+                    IsWireless = true;
                 }
 
                 this->sdp_server.send_request(IsWireless);
@@ -147,10 +147,10 @@ void TbdController::handle_sdp_server_input()
         usleep(250000);
 
         char protocol[IFNAMSIZ] = {0};
-        bool IsWireless = true; // false; //invert logic for testing on a wired if
+        bool IsWireless = false; //invert logic for testing on a wired if
         if (check_wireless(config.interface_name.c_str(), protocol) == 1)
         {
-            IsWireless = false; // true;
+            IsWireless = true;
         }
 
         this->sdp_server.send_request(IsWireless);
