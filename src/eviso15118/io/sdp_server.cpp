@@ -32,13 +32,43 @@ static void log_peer_hostname(const struct sockaddr_in6& address) {
 namespace io {
 
 SdpServer::SdpServer() {
-    //RDB for the EV side, we don't bind. Just set up the socket.
+    //RDB for the EV side, we don't bind, just set up the socket and send.
+    //For an example, and easy test of IPv6 UDP from one machine to another, try: https://github.com/bjornl/ipv6_multicast_example
     fd = socket(AF_INET6, SOCK_DGRAM, 0);
 
     if (fd == -1) {
         log_and_throw("Failed to open socket");
     }
 
+    int enable = 1;
+
+    //RDB Allow more than one socket to bind to the destination. Apparently,
+    //according to this: https://stackoverflow.com/questions/14388706/how-do-so-reuseaddr-and-so-reuseport-differ
+    //SO_REUSEADDR is the same as SO_REUSEPORT for multicast. I will use what Josev uses: SO_REUSEADDR
+    if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) == -1){
+        log_and_throw("setsockopt(SO_REUSEADDR) failed");
+    }
+
+    //RDB - looking at Josev, it is possible to restrict which interfaces will
+    //receive the UDP multicast, as well as to restrict the number of hops to 1 to force
+    //the UDP multicast to stay within the local network segment.
+
+    //Restrict the hops to 1
+    int hops = 1;
+
+    if(setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, &hops, sizeof(hops)) == -1){
+        log_and_throw("setsockopt(IPV6_MULTICAST_HOPS) failed");
+    }    
+
+    //Restrict to the chosen interface
+    //RDB TODO: Get the interface name from the config file.
+    int ifidx = ifnametoindex("wlan0");
+
+    if(setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &ifidx, sizeof(ifidx)) == -1){
+        log_and_throw("setsockopt(IPV6_MULTICAST_IF) failed");
+    }    
+
+    
 }
 
 SdpServer::~SdpServer() {
@@ -290,6 +320,8 @@ void SdpServer::send_request(const bool IsWireless)
 
         sendto(fd, v2g_packet, sizeof(v2g_packet), 0, reinterpret_cast<const sockaddr *>(&request.address),
                sizeof(request.address));
+        logf("Sent wireless SDP Request");
+
     }
 }
 
