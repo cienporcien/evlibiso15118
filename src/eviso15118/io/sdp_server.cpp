@@ -62,7 +62,7 @@ SdpServer::SdpServer() {
 
     //Restrict to the chosen interface
     //RDB TODO: Get the interface name from the config file.
-    int ifidx = ifnametoindex("wlan0");
+    int ifidx = if_nametoindex("wlan0");
 
     if(setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &ifidx, sizeof(ifidx)) == -1){
         log_and_throw("setsockopt(IPV6_MULTICAST_IF) failed");
