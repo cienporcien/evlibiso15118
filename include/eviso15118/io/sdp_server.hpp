@@ -15,13 +15,15 @@ struct PeerRequestContext {
     v2gtp::Security security;
     v2gtp::TransportProtocol transport_protocol;
     struct sockaddr_in6 address;
+    operator bool() const {
+        return valid;
+    }
+
+    //RDB add the additional properties for Wireless SDP
     v2gtp::P2PS_PPD p2ps_ppd;
     v2gtp::CouplingType coupling_type;
     std::string EVID; //20 ASCII characters
     std::string EVSEID; //36 ASCII characters
-    operator bool() const {
-        return valid;
-    }
 
 private:
     const bool valid;
@@ -80,5 +82,23 @@ private:
     //Convert
     void convert_id(uint8_t *out, const std::string in, const int length, const std::string defaultID);
 };
+
+class TlsKeyLoggingServer {
+public:
+    TlsKeyLoggingServer(const std::string& interface_name, uint16_t port);
+    ~TlsKeyLoggingServer();
+
+    ssize_t send(const char* line);
+
+    auto get_fd() const {
+        return fd;
+    }
+
+private:
+    int fd{-1};
+    uint8_t buffer[2048];
+    sockaddr_in6 destination_address{};
+};
+
 
 } // namespace eviso15118::io

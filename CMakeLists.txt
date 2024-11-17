@@ -17,6 +17,28 @@ true and hence downloading the schema files, YOU accept the ISO Customer \
 Licence Agreement (“Licence Agreement”), clauses 1. ISO’s Copyright, \
 7. Termination, 8. Limitations, and 9. Governing Law." OFF)
 
+
+option(EVISO15118_INSTALL "Enable install target" ${EVC_MAIN_PROJECT})
+
+option(EVISO15118_LINK_CUSTOM_MBEDTLS "\
+Link against a pinned mbedtls library\
+" ON)
+
+option(USE_OPENSSL "Use OpenSSL" ON)
+
+if (USE_OPENSSL)
+    find_package(OpenSSL 3 REQUIRED)
+endif()
+
+# list of compile options
+set(EVISO15118_COMPILE_OPTIONS_WARNING "-Wall;-Wextra;-Wno-unused-function;-Werror" CACHE STRING "A list of compile options used")
+message(STATUS "Building evlibiso15118 with the following compile options: ${EVISO15118_COMPILE_OPTIONS_WARNING}")
+
+if((${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME} OR ${PROJECT_NAME}_BUILD_TESTING) AND BUILD_TESTING)
+    set(ISO15118_BUILD_TESTING ON)
+endif()
+
+
 # dependencies
 if (NOT DISABLE_EDM)
     evc_setup_edm()
@@ -27,11 +49,13 @@ else()
     find_package(cbv2g REQUIRED)
 endif()
 
+add_subdirectory(3rd_party)
 add_subdirectory(input)
 add_subdirectory(src)
 
 if (EVISO15118_BUILD_TESTS)
     include(CTest)
+    list(APPEND CMAKE_MODULE_PATH ${CPM_PACKAGE_catch2_SOURCE_DIR}/extras)
     add_subdirectory(test)
 endif()
 

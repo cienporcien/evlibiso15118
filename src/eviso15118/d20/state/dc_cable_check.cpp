@@ -26,7 +26,7 @@ void DC_CableCheck::enter() {
     ctx.log.enter_state("DC_CableCheck");
 
     //Prepare and send the request
-    const auto req = DC_CableCheck::setup_request(ctx.session);
+    const auto req = setup_request(ctx.session);
     ctx.request(req);
 }
 

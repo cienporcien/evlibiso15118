@@ -12,7 +12,6 @@ target_sources(eviso15118
         misc/helper.cpp
         misc/cb_exi.cpp
 
-        io/connection_ssl.cpp
         io/connection_plain.cpp
         io/logging.cpp
         io/poll_manager.cpp
@@ -75,19 +74,7 @@ target_sources(eviso15118
         tbd_controller.cpp
 )
 
-if (NOT ISO15118_LINK_CUSTOM_MBEDTLS)
-    set(MBEDTLS_LINK_DEPENDENCIES
-        mbedtls
-        mbedx509
-        mbedcrypto
-    )
-else ()
-    set(MBEDTLS_LINK_DEPENDENCIES
-        mbedtls_custom
-        mbedx509_custom
-        mbedcrypto_custom
-    )
-endif ()
+
 
 target_link_libraries(eviso15118
     PUBLIC
@@ -98,9 +85,49 @@ target_link_libraries(eviso15118
     PRIVATE
         Threads::Threads
 
-        ${MBEDTLS_LINK_DEPENDENCIES}
-
 )
+
+if (USE_OPENSSL)
+    target_compile_definitions(eviso15118
+        PRIVATE
+            LIBISO_OPENSSL
+    )
+    target_link_libraries(eviso15118
+        PRIVATE
+            OpenSSL::SSL
+            OpenSSL::Crypto
+    )
+    target_sources(eviso15118
+        PRIVATE
+        io/connection_openssl.cpp
+        misc/helper_openssl.cpp
+    )
+else()
+    if (NOT EVISO15118_LINK_CUSTOM_MBEDTLS)
+        set(MBEDTLS_LINK_DEPENDENCIES
+            mbedtls
+            mbedx509
+            mbedcrypto
+        )
+    else()
+        set(MBEDTLS_LINK_DEPENDENCIES
+            mbedtls_custom
+            mbedx509_custom
+            mbedcrypto_custom
+        )
+    endif()
+    target_link_libraries(eviso15118
+        PRIVATE
+            ${MBEDTLS_LINK_DEPENDENCIES}
+    )
+    target_sources(eviso15118
+        PRIVATE
+        io/connection_mbedtls.cpp
+        misc/helper_mbedtls.cpp
+    )
+endif()
 
 # FIXME (aw): do we want to have this public here?
 target_compile_features(eviso15118 PUBLIC cxx_std_17)
+
+target_compile_options(iso15118 PRIVATE ${ISO15118_COMPILE_OPTIONS_WARNING})

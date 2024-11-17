@@ -5,8 +5,9 @@
 #include <functional>
 #include <string>
 
-namespace eviso15118::io {
-void set_logging_callback(const std::function<void(std::string)>&);
+#include "log_levels.hpp"
 
+namespace eviso15118::io {
+void set_logging_callback(const std::function<void(LogLevel, std::string)>&);
 
 } // namespace eviso15118::io

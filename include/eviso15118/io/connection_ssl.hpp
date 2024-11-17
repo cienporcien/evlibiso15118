@@ -18,7 +18,9 @@ public:
 
     void set_event_callback(const ConnectionEventCallback&) final;
     Ipv6EndPoint get_public_endpoint() const final;
+
     void set_public_endpoint(const Ipv6EndPoint&) final;
+
 
     void write(const uint8_t* buf, size_t len) final;
     ReadResult read(uint8_t* buf, size_t len) final;
@@ -35,7 +37,7 @@ private:
 
     ConnectionEventCallback event_callback{nullptr};
 
-    bool handshake_complete {false};
+    bool handshake_complete{false};
 
     void handle_connect();
     void handle_data();

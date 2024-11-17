@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2023 Pionix GmbH and Contributors to EVerest
+// Copyright 2024 Pionix GmbH and Contributors to EVerest
 #include <eviso15118/io/connection_ssl.hpp>
 
 #include <cassert>
 #include <cstring>
 #include <filesystem>
-#include <thread>
 
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/debug.h"
@@ -15,7 +14,54 @@
 #include "mbedtls/ssl.h"
 
 #include <eviso15118/detail/helper.hpp>
+#include <eviso15118/detail/io/helper_mbedtls.hpp>
 #include <eviso15118/detail/io/socket_helper.hpp>
+
+namespace std {
+template <> class default_delete<mbedtls_ssl_context> {
+public:
+    void operator()(mbedtls_ssl_context* ptr) const {
+        ::mbedtls_ssl_free(ptr);
+    }
+};
+template <> class default_delete<mbedtls_net_context> {
+public:
+    void operator()(mbedtls_net_context* ptr) const {
+        ::mbedtls_net_free(ptr);
+    }
+};
+template <> class default_delete<mbedtls_ssl_config> {
+public:
+    void operator()(mbedtls_ssl_config* ptr) const {
+        ::mbedtls_ssl_config_free(ptr);
+    }
+};
+template <> class default_delete<mbedtls_x509_crt> {
+public:
+    void operator()(mbedtls_x509_crt* ptr) const {
+        ::mbedtls_x509_crt_free(ptr);
+    }
+};
+template <> class default_delete<mbedtls_ctr_drbg_context> {
+public:
+    void operator()(mbedtls_ctr_drbg_context* ptr) const {
+        ::mbedtls_ctr_drbg_free(ptr);
+    }
+};
+template <> class default_delete<mbedtls_entropy_context> {
+public:
+    void operator()(mbedtls_entropy_context* ptr) const {
+        ::mbedtls_entropy_free(ptr);
+    }
+};
+template <> class default_delete<mbedtls_pk_context> {
+public:
+    void operator()(mbedtls_pk_context* ptr) const {
+        ::mbedtls_pk_free(ptr);
+    }
+};
+
+} // namespace std
 
 namespace eviso15118::io {
 
@@ -88,7 +134,7 @@ static void load_certificates(SSLContext& ssl, const config::SSLConfig& ssl_conf
 }
 
 ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& interface_name,
-                             const config::SSLConfig& ssl_config, const io::Ipv6EndPoint& end_point) :
+                             const config::SSLConfig& ssl_config) :
     poll_manager(poll_manager_), ssl(std::make_unique<SSLContext>()) {
 
 #if MBEDTLS_VERSION_MAJOR == 3
@@ -96,11 +142,11 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
     psa_crypto_init();
 #endif
 
-    //Convert the address and port to a sockaddr_in6
     sockaddr_in6 address;
-    address.sin6_family=AF_INET6;
-    memcpy(&address.sin6_addr, end_point.address, sizeof(&address.sin6_addr));
-    address.sin6_port=end_point.port;
+    if (not get_first_sockaddr_in6_for_interface(interface_name, address)) {
+        const auto msg = "Failed to get ipv6 socket address for interface " + interface_name;
+        log_and_throw(msg.c_str());
+    }
 
     const auto address_name = sockaddr_in6_to_name(address);
 
@@ -109,6 +155,9 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
             "Failed to determine string representation of ipv6 socket address for interface " + interface_name;
         log_and_throw(msg.c_str());
     }
+
+    end_point.port = 50000;
+    memcpy(&end_point.address, &address.sin6_addr, sizeof(address.sin6_addr));
 
     //
     // mbedtls specifica
@@ -143,7 +192,7 @@ ConnectionSSL::ConnectionSSL(PollManager& poll_manager_, const std::string& inte
     mbedtls_ssl_conf_dbg(
         &ssl->conf,
         [](void* callback_context, int debug_level, const char* file_name, int line_number, const char* message) {
-            logf("mbedtls debug (level: %d) - %s\n", debug_level, message);
+            logf_debug("mbedtls debug (level: %d) - %s\n", debug_level, message);
         },
         stdout);
 
@@ -174,12 +223,6 @@ void ConnectionSSL::set_event_callback(const ConnectionEventCallback& callback) 
 Ipv6EndPoint ConnectionSSL::get_public_endpoint() const {
     return end_point;
 }
-
-
-void ConnectionSSL::set_public_endpoint(const Ipv6EndPoint& ep) {
-    end_point=ep;
-}
-
 
 void ConnectionSSL::write(const uint8_t* buf, size_t len) {
     assert(handshake_complete);
@@ -225,10 +268,10 @@ void ConnectionSSL::handle_connect() {
     mbedtls_ssl_set_bio(&ssl->ssl, &ssl->connection_net_ctx, mbedtls_net_send, mbedtls_net_recv, NULL);
 
     // FIXME (aw): is it okay (according to iso15118 and mbedtls) to close the accepting socket here?
+    // NOTE (sl): Closed when the SSLContext object is deleted by the default_delete
     poll_manager.unregister_fd(ssl->accepting_net_ctx.fd);
-    mbedtls_net_free(&ssl->accepting_net_ctx);
 
-    publish_event(ConnectionEvent::ACCEPTED);
+    call_if_available(event_callback, ConnectionEvent::ACCEPTED);
 
     poll_manager.register_fd(ssl->connection_net_ctx.fd, [this]() { this->handle_data(); });
 }
@@ -248,26 +291,23 @@ void ConnectionSSL::handle_data() {
             log_and_raise_mbed_error("Failed to mbedtls_ssl_handshake()", ssl_handshake_result);
         } else {
             // handshake complete!
-            logf("Handshake complete!\n");
+            logf_info("Handshake complete!\n");
 
             handshake_complete = true;
 
-            publish_event(ConnectionEvent::OPEN);
+            call_if_available(event_callback, ConnectionEvent::OPEN);
 
             return;
         }
     }
 
-    publish_event(ConnectionEvent::NEW_DATA);
+    call_if_available(event_callback, ConnectionEvent::NEW_DATA);
 }
 
 void ConnectionSSL::close() {
 
     /* tear down TLS connection gracefully */
-    logf("Closing TLS connection\n");
-
-    // Wait for 5 seconds [V2G20-1643]
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    logf_info("Closing TLS connection\n");
 
     poll_manager.unregister_fd(ssl->connection_net_ctx.fd);
 
@@ -278,14 +318,10 @@ void ConnectionSSL::close() {
             log_and_raise_mbed_error("Failed to mbedtls_ssl_close_notify()", ssl_close_result);
         }
     } else {
-        logf("TLS connection closed gracefully\n");
+        logf_info("TLS connection closed gracefully\n");
     }
 
-    publish_event(ConnectionEvent::CLOSED);
-
-    mbedtls_net_free(&ssl->connection_net_ctx);
-
-    mbedtls_ssl_free(&ssl->ssl);
+    call_if_available(event_callback, ConnectionEvent::CLOSED);
 }
 
 } // namespace eviso15118::io
